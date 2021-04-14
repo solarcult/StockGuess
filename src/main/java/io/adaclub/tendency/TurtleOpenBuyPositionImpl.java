@@ -12,10 +12,10 @@ public class TurtleOpenBuyPositionImpl implements OpenBuyPosition {
     public BuyPosition toBuyOrNotToBuy(List<StockMetaDO> histories, StockMetaDO today) {
         TendencyUtil.WaveStatus waveStatus = TendencyUtil.waveHighLow(histories,today);
         if(waveStatus.higherThanHigh == getPeriod()){
-            System.out.println(waveStatus);
+//            System.out.println(waveStatus);
             return new BuyPosition(true, RecallFrameWork.takeOneHand);
         }
-        return new BuyPosition(false,0);
+        return NotBuy;
     }
 
     @Override

@@ -13,7 +13,7 @@ public class TurtleTest {
 
     public static void main(String[] args){
         RecallFrameWork.chartType = "Turtle";
-        String stockCode = "000333";
+        String stockCode = "QQQ";
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
         List<XPosition> positions = RecallFrameWork.goThrough(stockMetaDOs,new TurtleOpenBuyPositionImpl(),new TurtleCloseBuyPositionImpl());

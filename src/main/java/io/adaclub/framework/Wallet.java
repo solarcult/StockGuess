@@ -11,12 +11,12 @@ public class Wallet {
         this.myWallet = wallet;
     }
 
-    public boolean spend(double spend){
+    public double spend(double spend){
         if(spend > myWallet){
-            return false;
+            throw new RuntimeException("Don'T Have Enough Money. :(");
         }
         myWallet -= spend;
-        return true;
+        return myWallet;
     }
 
     public double fund(double fund){
@@ -24,7 +24,7 @@ public class Wallet {
         return myWallet;
     }
 
-    public double getMyWallet() {
+    public double getMyLeftMoney() {
         return myWallet;
     }
 

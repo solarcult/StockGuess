@@ -12,8 +12,7 @@ public class TurtleCloseBuyPositionImpl implements CloseBuyPosition {
     public ClosePosition closeBuyPosition(List<StockMetaDO> histories, StockMetaDO today, XPosition nowPosition) {
         TendencyUtil.WaveStatus waveStatus = TendencyUtil.waveHighLow(histories,today);
         if(waveStatus.lowerThanLow == getPeriod()){
-            System.out.println(getPeriod()+" : close");
-            System.out.println(waveStatus);
+//            System.out.println(waveStatus);
             return new ClosePosition(true, nowPosition.getQuantity(),"ALL");
         }
         return NotClose;

@@ -19,8 +19,13 @@ public class RecallFrameWork {
     public static int Period_Days_20 = 20;
     public static int Period_Days_10 = 10;
     public static int Period_Days_5 = 5;
-    public static int takeOneHand = 100;
-    public static int StartMoney = 50000;
+    //每手股数
+    public static int takeOneHand = 50;
+    //最大允许持有手数
+    public static int maxHand = 5;
+    //起始资金
+    public static int StartMoney = 20000;
+    //画图时的类型展示文字用
     public static String chartType;
 
     /**
@@ -37,7 +42,7 @@ public class RecallFrameWork {
         String stockName = stockMetaDOs.get(0).getStock();
         TimeSeries series = new TimeSeries(stockName);
 
-        for(int i = RecallFrameWork.Period_Days_20; i < stockMetaDOs.size(); i++){
+        for(int i = openBuyPositionImpl.getPeriod(); i < stockMetaDOs.size(); i++){
 
             XPosition nowPositionStatus = XPosition.positionStatus(positions);
 
@@ -46,6 +51,11 @@ public class RecallFrameWork {
             boolean hasTomorrow = (i + 1) < stockMetaDOs.size();
             if(hasTomorrow) {
                 tomorrow = stockMetaDOs.get(i + 1);
+            }
+            //take tomorrowOpen price first or take today close price
+            double actionPrice = today.getClose();
+            if(tomorrow != null){
+                actionPrice = tomorrow.getOpen();
             }
 
             CloseBuyPosition.ClosePosition closePosition = CloseBuyPosition.NotClose;
@@ -76,15 +86,26 @@ public class RecallFrameWork {
                 }
             }
 
-            if (buyPosition.isBuy()) {
-                //take tomorrowOpen price first or take today close price
-                double buyPrice = today.getClose();
-                if(tomorrow != null){
-                    buyPrice = tomorrow.getOpen();
+            int leftCanBuyNumber = maxHand * takeOneHand - nowPositionStatus.getQuantity();
+            if (buyPosition.isBuy() && leftCanBuyNumber > 0 ) {
+
+                //计算手数是否超过最大允许值
+                if(buyPosition.getMany() > leftCanBuyNumber){
+                    System.out.println(" Left Hand WARNING USED MAX Hand : " + stockName +" : " +buyPosition.getMany() +" -> " + leftCanBuyNumber);
+                    buyPosition.setMany(leftCanBuyNumber);
                 }
-                double spend = buyPrice * takeOneHand;
-                if(myWallet.spend(spend)) {
-                    XPosition buyOneHand = new XPosition(XPosition.BuyOrSellType.BUY.name(), buyPrice, buyPosition.getMany(), today.getDate(),buyPosition.getDescribe());
+
+                //计算钱是否够用
+                double spend = actionPrice * buyPosition.getMany();
+                if(myWallet.getMyLeftMoney() < spend){
+                    int canBuyNumber = (int) Math.floor(myWallet.getMyLeftMoney() / actionPrice);
+                    System.out.println(" $ WARNING NOT ENOUGH Money : " + stockName+" left $: " + myWallet.getMyLeftMoney() +" change: " + buyPosition.getMany() + " -> " + canBuyNumber );
+                    buyPosition.setMany(canBuyNumber);
+                }
+
+                if(buyPosition.getMany() > 0) {
+                    myWallet.spend(buyPosition.getMany() * actionPrice);
+                    XPosition buyOneHand = new XPosition(XPosition.BuyOrSellType.BUY.name(), actionPrice, buyPosition.getMany(), today.getDate(), buyPosition.getDescribe());
                     positions.add(buyOneHand);
                     System.out.println(buyOneHand);
                     System.out.println(myWallet);
@@ -93,14 +114,9 @@ public class RecallFrameWork {
             }
 
             if(closePosition.isClose()){
-                //take tomorrowOpen price first or take today close price
-                double sellPrice = today.getClose();
-                if(tomorrow != null){
-                    sellPrice = tomorrow.getOpen();
-                }
-                double fund = sellPrice * closePosition.getMany();
+                double fund = actionPrice * closePosition.getMany();
                 myWallet.fund(fund);
-                XPosition closeBuyOneHand = new XPosition(XPosition.BuyOrSellType.SELL.name(), sellPrice, closePosition.getMany(),today.getDate(),closePosition.getDescribe());
+                XPosition closeBuyOneHand = new XPosition(XPosition.BuyOrSellType.SELL.name(), actionPrice, closePosition.getMany(),today.getDate(),closePosition.getDescribe());
                 positions.add(closeBuyOneHand);
                 System.out.println(closeBuyOneHand);
                 System.out.println(myWallet);
