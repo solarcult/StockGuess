@@ -4,6 +4,7 @@ import io.adaclub.db.StockAnalyzeDO;
 import io.adaclub.db.StockAnaylzeDAOImpl;
 import io.adaclub.db.StockMetaDAOImpl;
 import io.adaclub.db.StockMetaDO;
+import io.adaclub.framework.RecallFrameWork;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.Collections;
@@ -109,7 +110,11 @@ public class StockMetaAnalyzeUtil {
 
     public static void main(String[] args){
 
-        List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list("SPY",StockMetaDO.CycleType.DAY.name(), 1000);
-        analyzeXDays(stockMetaDOs,20);
+        String stockCode = "ASML";
+
+        List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
+        analyzeXDays(stockMetaDOs,RecallFrameWork.Period_Days_5);
+        analyzeXDays(stockMetaDOs,RecallFrameWork.Period_Days_10);
+        analyzeXDays(stockMetaDOs, RecallFrameWork.Period_Days_20);
     }
 }

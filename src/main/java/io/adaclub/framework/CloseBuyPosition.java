@@ -6,19 +6,21 @@ import java.util.List;
 
 public interface CloseBuyPosition {
 
-    ClosePosition NotClose = new ClosePosition(false,0);
+    ClosePosition NotClose = new ClosePosition(false,0,"NOT");
 
-    ClosePosition closeBuyPosition(List<StockMetaDO> history, StockMetaDO today);
+    ClosePosition closeBuyPosition(List<StockMetaDO> histories, StockMetaDO today, XPosition nowPosition);
 
     int getPeriod();
 
     class ClosePosition{
         private int many;
         private boolean isSell;
+        private String describe;
 
-        public ClosePosition(boolean isSell,int many){
+        public ClosePosition(boolean isSell,int many,String describe){
             this.isSell = isSell;
             this.many = many;
+            this.describe = describe;
         }
 
         public int getMany() {
@@ -29,7 +31,7 @@ public interface CloseBuyPosition {
             this.many = many;
         }
 
-        public boolean isSell() {
+        public boolean isClose() {
             return isSell;
         }
 
@@ -37,11 +39,20 @@ public interface CloseBuyPosition {
             isSell = sell;
         }
 
+        public String getDescribe() {
+            return describe;
+        }
+
+        public void setDescribe(String describe) {
+            this.describe = describe;
+        }
+
         @Override
         public String toString() {
-            return "BuyPosition{" +
+            return "ClosePosition{" +
                     "many=" + many +
                     ", isSell=" + isSell +
+                    ", describe='" + describe + '\'' +
                     '}';
         }
     }

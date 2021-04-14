@@ -1,9 +1,14 @@
 package io.adaclub.framework;
 
+import io.adaclub.TimeSeriesChart;
 import io.adaclub.db.StockMetaDAOImpl;
 import io.adaclub.db.StockMetaDO;
 import io.adaclub.tendency.TurtleCloseBuyPositionImpl;
 import io.adaclub.tendency.TurtleOpenBuyPositionImpl;
+import org.jfree.data.time.Day;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYDataset;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,56 +20,105 @@ public class RecallFrameWork {
     public static int Period_Days_10 = 10;
     public static int Period_Days_5 = 5;
     public static int takeOneHand = 100;
+    public static int StartMoney = 50000;
 
     /**
      * 回溯数据
      * @param stockMetaDOs 从数据库查询出来的数据,最近的日期在0的位置
-     * @param openBuyPosition
-     * @param closeBuyPosition
+     * @param openBuyPositionImpl
+     * @param closeBuyPositionImpl
      */
-    public static List<XPosition> goThrough(List<StockMetaDO> stockMetaDOs, OpenBuyPosition openBuyPosition, CloseBuyPosition closeBuyPosition){
+    public static List<XPosition> goThrough(List<StockMetaDO> stockMetaDOs, OpenBuyPosition openBuyPositionImpl, CloseBuyPosition closeBuyPositionImpl){
+        Wallet myWallet = new Wallet(StartMoney);
         //将0位置变为时间最远的数据,方便编码理解,0代表过去,size()的位置代表现在
         Collections.reverse(stockMetaDOs);
         List<XPosition> positions = new ArrayList<>();
+        String stockName = stockMetaDOs.get(0).getStock();
+        TimeSeries series = new TimeSeries(stockName);
 
         for(int i = RecallFrameWork.Period_Days_20; i < stockMetaDOs.size(); i++){
 
-            XPosition nowPostionStatus = XPosition.positionStatus(positions);
+            XPosition nowPositionStatus = XPosition.positionStatus(positions);
 
             StockMetaDO today = stockMetaDOs.get(i);
-            boolean hasTomorrow = (i+1) < stockMetaDOs.size();
-            if(nowPostionStatus.getQuantity()==0) {
-                OpenBuyPosition.BuyPosition buyPosition = openBuyPosition.toBuyOrNotToBuy(stockMetaDOs.subList(i - openBuyPosition.getPeriod(), i), today);
-                if (buyPosition.isBuy()) {
-                    //take tomorrowOpen price first or take today close price
-                    double buyPrice = today.getClose();
-                    if (hasTomorrow) {
-                        buyPrice = stockMetaDOs.get(i + 1).getOpen();
-                    }
-                    XPosition buyOneHand = new XPosition(XPosition.BuyOrSellType.BUY.name(), buyPrice, buyPosition.getMany(), today.getDate());
-                    positions.add(buyOneHand);
-                    System.out.println(buyOneHand);
+            StockMetaDO tomorrow = null;
+            boolean hasTomorrow = (i + 1) < stockMetaDOs.size();
+            if(hasTomorrow) {
+                tomorrow = stockMetaDOs.get(i + 1);
+            }
+
+            CloseBuyPosition.ClosePosition closePosition = CloseBuyPosition.NotClose;
+            //判断是否需要平仓
+            if(nowPositionStatus.getQuantity() > 0) {
+                closePosition = closeBuyPositionImpl.closeBuyPosition(stockMetaDOs.subList(i - closeBuyPositionImpl.getPeriod(), i), today,nowPositionStatus);
+
+            }
+            //判断是否要开仓
+            OpenBuyPosition.BuyPosition buyPosition = openBuyPositionImpl.toBuyOrNotToBuy(stockMetaDOs.subList(i - openBuyPositionImpl.getPeriod(), i), today);
+
+            //综合考虑怎么办
+            if(buyPosition.isBuy() && closePosition.isClose()){
+                int finalQuantity = buyPosition.getMany() - closePosition.getMany();
+                if(finalQuantity > 0){
+                    //buy is bigger than close
+                    buyPosition.setMany(finalQuantity);
+                    buyPosition.setDescribe("REMAKE");
+                    closePosition = CloseBuyPosition.NotClose;
+                }else if(finalQuantity < 0){
+                    closePosition.setMany(Math.abs(finalQuantity));
+                    closePosition.setDescribe(closePosition.getDescribe()+"-REMAKE");
+                    buyPosition = OpenBuyPosition.NotBuy;
+                }else {
+                    //same amount
+                    buyPosition = OpenBuyPosition.NotBuy;
+                    closePosition = CloseBuyPosition.NotClose;
                 }
             }
 
-            nowPostionStatus = XPosition.positionStatus(positions);
-
-            //判断是否需要平仓
-            if(nowPostionStatus.getQuantity() > 0) {
-                CloseBuyPosition.ClosePosition closePosition = closeBuyPosition.closeBuyPosition(stockMetaDOs.subList(i - closeBuyPosition.getPeriod(), i), today);
-                if(closePosition.isSell()){
-                    //take tomorrowOpen price first or take today close price
-                    double sellPrice = today.getClose();
-                    if(hasTomorrow){
-                        sellPrice = stockMetaDOs.get(i+1).getOpen();
-                    }
-                    XPosition closeBuyOneHand = new XPosition(XPosition.BuyOrSellType.SELL.name(), sellPrice, nowPostionStatus.getQuantity(),today.getDate());
-                    positions.add(closeBuyOneHand);
-                    System.out.println(closeBuyOneHand);
+            if (buyPosition.isBuy()) {
+                //take tomorrowOpen price first or take today close price
+                double buyPrice = today.getClose();
+                if(tomorrow != null){
+                    buyPrice = tomorrow.getOpen();
+                }
+                double spend = buyPrice * takeOneHand;
+                if(myWallet.spend(spend)) {
+                    XPosition buyOneHand = new XPosition(XPosition.BuyOrSellType.BUY.name(), buyPrice, buyPosition.getMany(), today.getDate(),buyPosition.getDescribe());
+                    positions.add(buyOneHand);
+                    System.out.println(buyOneHand);
+                    System.out.println(myWallet);
                     System.out.println();
                 }
             }
+
+            if(closePosition.isClose()){
+                //take tomorrowOpen price first or take today close price
+                double sellPrice = today.getClose();
+                if(tomorrow != null){
+                    sellPrice = tomorrow.getOpen();
+                }
+                double fund = sellPrice * closePosition.getMany();
+                myWallet.fund(fund);
+                XPosition closeBuyOneHand = new XPosition(XPosition.BuyOrSellType.SELL.name(), sellPrice, closePosition.getMany(),today.getDate(),closePosition.getDescribe());
+                positions.add(closeBuyOneHand);
+                System.out.println(closeBuyOneHand);
+                System.out.println(myWallet);
+                System.out.println();
+            }
+
+            //进行数据整理绘图
+            Day day = new Day(today.getDate());
+
+//            XPosition result = XPosition.positionStatus(positions);
+//            series.add(day,myWallet.getMyWallet() + today.getClose() * result.getQuantity());
+
+            series.add(day,XPosition.totalProfit(positions,today) );
         }
+
+        XYDataset dataset = new TimeSeriesCollection(series);
+        TimeSeriesChart timeSeriesChart = new TimeSeriesChart(stockName,dataset);
+        timeSeriesChart.pack();
+        timeSeriesChart.setVisible(true);
 
         return positions;
     }

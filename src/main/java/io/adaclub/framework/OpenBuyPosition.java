@@ -8,13 +8,14 @@ public interface OpenBuyPosition {
 
     BuyPosition NotBuy = new BuyPosition(false,0);
 
-    BuyPosition toBuyOrNotToBuy(List<StockMetaDO> history, StockMetaDO today);
+    BuyPosition toBuyOrNotToBuy(List<StockMetaDO> histories, StockMetaDO today);
 
     int getPeriod();
 
     class BuyPosition{
         private int many;
         private boolean isBuy;
+        private String describe;
 
         public BuyPosition(boolean isBuy,int many){
             this.isBuy = isBuy;
@@ -37,11 +38,20 @@ public interface OpenBuyPosition {
             isBuy = buy;
         }
 
+        public String getDescribe() {
+            return describe;
+        }
+
+        public void setDescribe(String describe) {
+            this.describe = describe;
+        }
+
         @Override
         public String toString() {
             return "BuyPosition{" +
                     "many=" + many +
                     ", isBuy=" + isBuy +
+                    ", describe='" + describe + '\'' +
                     '}';
         }
     }
