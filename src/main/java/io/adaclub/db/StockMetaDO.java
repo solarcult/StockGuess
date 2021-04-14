@@ -112,16 +112,7 @@ public class StockMetaDO {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StockMetaDO that = (StockMetaDO) o;
-        boolean result = Objects.equals(stock, that.stock) && Objects.equals(cycle, that.cycle) && Objects.equals(date, that.date);
-        if(result){
-            if(Math.abs(this.getHigh() - that.getHigh()) < miu
-                    && Math.abs(this.getLow() - that.getLow()) < miu
-                    && Math.abs(this.getClose() - that.getClose()) < miu
-                ){
-                return true;
-            }
-        }
-        return false;
+        return Objects.equals(stock, that.stock) && Objects.equals(cycle, that.cycle) && Objects.equals(date, that.date);
     }
 
     @Override

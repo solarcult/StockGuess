@@ -21,6 +21,7 @@ public class RecallFrameWork {
     public static int Period_Days_5 = 5;
     public static int takeOneHand = 100;
     public static int StartMoney = 50000;
+    public static String chartType;
 
     /**
      * 回溯数据
@@ -116,7 +117,7 @@ public class RecallFrameWork {
         }
 
         XYDataset dataset = new TimeSeriesCollection(series);
-        TimeSeriesChart timeSeriesChart = new TimeSeriesChart(stockName,dataset);
+        TimeSeriesChart timeSeriesChart = new TimeSeriesChart(stockName+" "+chartType,dataset);
         timeSeriesChart.pack();
         timeSeriesChart.setVisible(true);
 

@@ -113,8 +113,8 @@ public class StockMetaAnalyzeUtil {
         String stockCode = "ASML";
 
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
-        analyzeXDays(stockMetaDOs,RecallFrameWork.Period_Days_5);
-        analyzeXDays(stockMetaDOs,RecallFrameWork.Period_Days_10);
+        analyzeXDays(stockMetaDOs, RecallFrameWork.Period_Days_5);
+        analyzeXDays(stockMetaDOs, RecallFrameWork.Period_Days_10);
         analyzeXDays(stockMetaDOs, RecallFrameWork.Period_Days_20);
     }
 }

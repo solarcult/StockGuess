@@ -12,7 +12,8 @@ import java.util.List;
 public class BollTest {
 
     public static void main(String[] args){
-        String stockCode = "SPY";
+        RecallFrameWork.chartType = "Boll";
+        String stockCode = "000333";
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
         List<XPosition> positions = RecallFrameWork.goThrough(stockMetaDOs,new BollOpenBuyPositionImpl(),new BollCloseBuyPositionImpl());

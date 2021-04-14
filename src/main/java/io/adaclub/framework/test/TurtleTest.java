@@ -12,14 +12,16 @@ import java.util.List;
 public class TurtleTest {
 
     public static void main(String[] args){
-        String stockCode = "SPY";
+        RecallFrameWork.chartType = "Turtle";
+        String stockCode = "000333";
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
         List<XPosition> positions = RecallFrameWork.goThrough(stockMetaDOs,new TurtleOpenBuyPositionImpl(),new TurtleCloseBuyPositionImpl());
+        System.out.println("\nGo through: ");
         for(XPosition xPosition : positions){
             System.out.println(xPosition);
         }
-        System.out.println("totalSize : " + positions.size());
+        System.out.println("\ntotalSize : " + positions.size());
         System.out.println("Profit : "+XPosition.totalProfit(positions,today));
     }
 }
