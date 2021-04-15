@@ -15,7 +15,7 @@ public class BollOpenTurtleCloseTest {
         String stockCode = "BABA";
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
-        List<XPosition> positions = RecallFrameWork.goThrough(stockMetaDOs,new BollOpenBuyPositionImpl(),new TurtleCloseBuyPositionImpl());
+        List<XPosition> positions = RecallFrameWork.goThrough(stockMetaDOs,new BollOpenBuyPositionImpl(5,20),new TurtleCloseBuyPositionImpl());
         for(XPosition xPosition : positions){
             System.out.println(xPosition);
         }

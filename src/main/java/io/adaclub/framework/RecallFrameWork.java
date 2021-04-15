@@ -19,25 +19,28 @@ public class RecallFrameWork {
     public static int Period_Days_20 = 20;
     public static int Period_Days_10 = 10;
     public static int Period_Days_5 = 5;
+    public static int MIN_PERIOD_DAYS = 3;
+    public static int MAX_PERIOD_DAYS = 60;
+
     //每手股数
-    public static int takeOneHand = 50;
+    public static int takeOneHand = 100;
     //最大允许持有手数
-    public static int maxHand = 5;
+    public static int maxHand = 50;
     //起始资金
-    public static int StartMoney = 20000;
+    public static int StartMoney = 20000000;
     //画图时的类型展示文字用
     public static String chartType;
+
+    public static boolean DEBUG = false;
 
     /**
      * 回溯数据
      * @param stockMetaDOs 从数据库查询出来的数据,最近的日期在0的位置
-     * @param openBuyPositionImpl
-     * @param closeBuyPositionImpl
+     * @param openBuyPositionImpl openBuyPositionImpl
+     * @param closeBuyPositionImpl closeBuyPositionImpl
      */
     public static List<XPosition> goThrough(List<StockMetaDO> stockMetaDOs, OpenBuyPosition openBuyPositionImpl, CloseBuyPosition closeBuyPositionImpl){
         Wallet myWallet = new Wallet(StartMoney);
-        //将0位置变为时间最远的数据,方便编码理解,0代表过去,size()的位置代表现在
-        Collections.reverse(stockMetaDOs);
         List<XPosition> positions = new ArrayList<>();
         String stockName = stockMetaDOs.get(0).getStock();
         TimeSeries series = new TimeSeries(stockName);
@@ -62,7 +65,6 @@ public class RecallFrameWork {
             //判断是否需要平仓
             if(nowPositionStatus.getQuantity() > 0) {
                 closePosition = closeBuyPositionImpl.closeBuyPosition(stockMetaDOs.subList(i - closeBuyPositionImpl.getPeriod(), i), today,nowPositionStatus);
-
             }
             //判断是否要开仓
             OpenBuyPosition.BuyPosition buyPosition = openBuyPositionImpl.toBuyOrNotToBuy(stockMetaDOs.subList(i - openBuyPositionImpl.getPeriod(), i), today);
@@ -107,9 +109,11 @@ public class RecallFrameWork {
                     myWallet.spend(buyPosition.getMany() * actionPrice);
                     XPosition buyOneHand = new XPosition(XPosition.BuyOrSellType.BUY.name(), actionPrice, buyPosition.getMany(), today.getDate(), buyPosition.getDescribe());
                     positions.add(buyOneHand);
-                    System.out.println(buyOneHand);
-                    System.out.println(myWallet);
-                    System.out.println();
+                    if(DEBUG) {
+                        System.out.println(buyOneHand);
+                        System.out.println(myWallet);
+                        System.out.println();
+                    }
                 }
             }
 
@@ -118,9 +122,11 @@ public class RecallFrameWork {
                 myWallet.fund(fund);
                 XPosition closeBuyOneHand = new XPosition(XPosition.BuyOrSellType.SELL.name(), actionPrice, closePosition.getMany(),today.getDate(),closePosition.getDescribe());
                 positions.add(closeBuyOneHand);
-                System.out.println(closeBuyOneHand);
-                System.out.println(myWallet);
-                System.out.println();
+                if(DEBUG) {
+                    System.out.println(closeBuyOneHand);
+                    System.out.println(myWallet);
+                    System.out.println();
+                }
             }
 
             //进行数据整理绘图
@@ -132,10 +138,10 @@ public class RecallFrameWork {
             series.add(day,XPosition.totalProfit(positions,today) );
         }
 
-        XYDataset dataset = new TimeSeriesCollection(series);
-        TimeSeriesChart timeSeriesChart = new TimeSeriesChart(stockName+" "+chartType,dataset);
-        timeSeriesChart.pack();
-        timeSeriesChart.setVisible(true);
+//        XYDataset dataset = new TimeSeriesCollection(series);
+//        TimeSeriesChart timeSeriesChart = new TimeSeriesChart(stockName+" "+chartType,dataset);
+//        timeSeriesChart.pack();
+//        timeSeriesChart.setVisible(true);
 
         return positions;
     }

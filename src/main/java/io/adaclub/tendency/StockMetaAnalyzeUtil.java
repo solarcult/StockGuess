@@ -13,8 +13,6 @@ import java.util.List;
 public class StockMetaAnalyzeUtil {
 
     public static void analyzeXDays(List<StockMetaDO> stockMetaDOs, int X){
-        //传入的是最近时间排到前面的数据(0->今天,size->以前),进行reverse后,变成(0->最以前,size->今天)
-        Collections.reverse(stockMetaDOs);
 
         SummaryStatistics close = new SummaryStatistics();
         SummaryStatistics high = new SummaryStatistics();
@@ -113,6 +111,8 @@ public class StockMetaAnalyzeUtil {
         String stockCode = "ASML";
 
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
+        Collections.reverse(stockMetaDOs);
+
         analyzeXDays(stockMetaDOs, RecallFrameWork.Period_Days_5);
         analyzeXDays(stockMetaDOs, RecallFrameWork.Period_Days_10);
         analyzeXDays(stockMetaDOs, RecallFrameWork.Period_Days_20);

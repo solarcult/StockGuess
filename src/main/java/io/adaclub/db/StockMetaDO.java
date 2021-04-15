@@ -105,8 +105,6 @@ public class StockMetaDO {
         this.pe = pe;
     }
 
-    double miu = 0.005;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

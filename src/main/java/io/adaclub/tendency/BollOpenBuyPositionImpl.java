@@ -12,6 +12,15 @@ import java.util.stream.Collectors;
 public class BollOpenBuyPositionImpl implements OpenBuyPosition {
 
     double tendencyIsUp = 0.7;
+    //短时间均线
+    int shortAvg;
+    //长时间均线
+    int longAvg;
+
+    public BollOpenBuyPositionImpl(int shortAvg ,int longAvg){
+        this.shortAvg = shortAvg;
+        this.longAvg = longAvg;
+    }
 
     @Override
     public BuyPosition toBuyOrNotToBuy(List<StockMetaDO> histories, StockMetaDO today) {
@@ -22,9 +31,9 @@ public class BollOpenBuyPositionImpl implements OpenBuyPosition {
             //如果相关数据没有准备好,则返回不交易,等待数据准备完毕.
             return NotBuy;
         }
-        StockAnalyzeDO todaySAO20 = StockAnalyzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(),getPeriod());
+        StockAnalyzeDO todaySAO20 = StockAnalyzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(),longAvg);
         List<StockAnalyzeDO> stockAnalyzeDOs5 =  StockAnalyzeDAOImpl.list(ids,today.getStock(),StockMetaDO.CycleType.DAY.name(), RecallFrameWork.Period_Days_5);
-        StockAnalyzeDO todaySAO5 = StockAnalyzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(), RecallFrameWork.Period_Days_5);
+        StockAnalyzeDO todaySAO5 = StockAnalyzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(), shortAvg);
 
         //计算20日均线状态
         TendencyUtil.WaveStatus waveStatus20 = TendencyUtil.waveAverageClose(stockAnalyzeDOs20,todaySAO20);
@@ -41,9 +50,11 @@ public class BollOpenBuyPositionImpl implements OpenBuyPosition {
                     today.getClose() <= (todaySAO5.getLowMean() -  todaySAO5.getLowSd())
 
                 ) {
-                System.out.println("\nbuy 20 : " + waveStatus20);
-                System.out.println("buy 05 : " + TendencyUtil.waveAverageClose(stockAnalyzeDOs5,todaySAO5));
-                System.out.println("buy 5low:" +todaySAO5.getLowMean() + " >5lm-sd " +  (todaySAO5.getLowMean() - todaySAO5.getLowSd()) + " >meclose: "+ today.getClose() +  " >20lm-sd: " +  (todaySAO20.getLowMean() - todaySAO20.getLowSd()) + " >20lm-2sd: " +  (todaySAO20.getLowMean() - 2 * todaySAO20.getLowSd())+"\n");
+                if(RecallFrameWork.DEBUG) {
+                    System.out.println("\nbuy 20 : " + waveStatus20);
+                    System.out.println("buy 05 : " + TendencyUtil.waveAverageClose(stockAnalyzeDOs5, todaySAO5));
+                    System.out.println("buy 5low:" + todaySAO5.getLowMean() + " >5lm-sd " + (todaySAO5.getLowMean() - todaySAO5.getLowSd()) + " >meclose: " + today.getClose() + " >20lm-sd: " + (todaySAO20.getLowMean() - todaySAO20.getLowSd()) + " >20lm-2sd: " + (todaySAO20.getLowMean() - 2 * todaySAO20.getLowSd()) + "\n");
+                }
                 return new BuyPosition(true, RecallFrameWork.takeOneHand);
             }
         }
@@ -54,5 +65,14 @@ public class BollOpenBuyPositionImpl implements OpenBuyPosition {
     @Override
     public int getPeriod() {
         return RecallFrameWork.Period_Days_20;
+    }
+
+    @Override
+    public String toString() {
+        return "BollOpenBuyPositionImpl{" +
+                "tendencyIsUp=" + tendencyIsUp +
+                ", shortAvg=" + shortAvg +
+                ", longAvg=" + longAvg +
+                '}';
     }
 }
