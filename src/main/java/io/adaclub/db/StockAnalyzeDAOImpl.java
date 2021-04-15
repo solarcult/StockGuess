@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class StockAnaylzeDAOImpl {
+public class StockAnalyzeDAOImpl {
 
     public static String INSERT_SQL = "insert into stock_analyze (cycle,stock_id,high_mean,high_sd,close_mean,close_sd,low_mean,low_sd,atr,change_volume_rate_total,effect,stock,xdays) value (?,?,?,?,?,?,?,?,?,?,?,?,?) ";
     public static String FIND_SQL = "select id,cycle,stock_id,high_mean,high_sd,close_mean,close_sd,low_mean,low_sd,atr,change_volume_rate_total,effect,stock,xdays from stock_analyze where stock_id = ? and stock = ? and cycle = ? and xdays = ?";
     public static String LIST_SQL = "select id,cycle,stock_id,high_mean,high_sd,close_mean,close_sd,low_mean,low_sd,atr,change_volume_rate_total,effect,stock,xdays from stock_analyze  where stock = ? and cycle = ? and xdays = ? and stock_id in ";
-
+    public static String DEL_SQL = "delete from stock_analyze where stock = ?";
 
     public static void insert(StockAnalyzeDO stockAnaylzeDO){
         PreparedStatement d = null;
@@ -141,9 +141,28 @@ public class StockAnaylzeDAOImpl {
         return stockAnaylzeDO;
     }
 
+    public static boolean deleteStockAllAnalyzeRecords(String stockCode){
+        PreparedStatement d = null;
+        try {
+            d = StockDBManager.getStockConnection().prepareStatement(DEL_SQL);
+            d.setString(1,stockCode);
+            return d.execute();
+        }catch(Exception e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                if(d!=null) d.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return false;
+    }
+
     public static void main(String[] args){
 
-        String stock = "KKK";
+        String stock = "AAPL";
         String cycle = "XXX";
         int xdays = 5;
 
@@ -175,6 +194,8 @@ public class StockAnaylzeDAOImpl {
 
 //        StockAnalyzeDO stockAnaylzeDO = findByStockStuff(343l,stock,cycle,xdays);
 //        System.out.println(stockAnaylzeDO);
+
+        deleteStockAllAnalyzeRecords(stock);
 
     }
 }

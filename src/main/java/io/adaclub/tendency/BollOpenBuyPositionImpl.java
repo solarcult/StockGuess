@@ -1,11 +1,10 @@
 package io.adaclub.tendency;
 
 import io.adaclub.db.StockAnalyzeDO;
-import io.adaclub.db.StockAnaylzeDAOImpl;
+import io.adaclub.db.StockAnalyzeDAOImpl;
 import io.adaclub.db.StockMetaDO;
 import io.adaclub.framework.OpenBuyPosition;
 import io.adaclub.framework.RecallFrameWork;
-import io.adaclub.framework.XPosition;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,14 +17,14 @@ public class BollOpenBuyPositionImpl implements OpenBuyPosition {
     public BuyPosition toBuyOrNotToBuy(List<StockMetaDO> histories, StockMetaDO today) {
 
         List<Long> ids = histories.stream().map(StockMetaDO::getId).collect(Collectors.toList());
-        List<StockAnalyzeDO> stockAnalyzeDOs20 =  StockAnaylzeDAOImpl.list(ids,today.getStock(),StockMetaDO.CycleType.DAY.name(),getPeriod());
+        List<StockAnalyzeDO> stockAnalyzeDOs20 =  StockAnalyzeDAOImpl.list(ids,today.getStock(),StockMetaDO.CycleType.DAY.name(),getPeriod());
         if(stockAnalyzeDOs20.size() != histories.size()){
             //如果相关数据没有准备好,则返回不交易,等待数据准备完毕.
             return NotBuy;
         }
-        StockAnalyzeDO todaySAO20 = StockAnaylzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(),getPeriod());
-        List<StockAnalyzeDO> stockAnalyzeDOs5 =  StockAnaylzeDAOImpl.list(ids,today.getStock(),StockMetaDO.CycleType.DAY.name(), RecallFrameWork.Period_Days_5);
-        StockAnalyzeDO todaySAO5 = StockAnaylzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(), RecallFrameWork.Period_Days_5);
+        StockAnalyzeDO todaySAO20 = StockAnalyzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(),getPeriod());
+        List<StockAnalyzeDO> stockAnalyzeDOs5 =  StockAnalyzeDAOImpl.list(ids,today.getStock(),StockMetaDO.CycleType.DAY.name(), RecallFrameWork.Period_Days_5);
+        StockAnalyzeDO todaySAO5 = StockAnalyzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(), RecallFrameWork.Period_Days_5);
 
         //计算20日均线状态
         TendencyUtil.WaveStatus waveStatus20 = TendencyUtil.waveAverageClose(stockAnalyzeDOs20,todaySAO20);

@@ -2,6 +2,7 @@ package io.adaclub.db;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -11,6 +12,7 @@ public class StockMetaDAOImpl {
     public static String INSERT_SQL = "insert into stock_meta (stock,cycle,open,close,high,low,date,volume,change_volume_rate,pe) value (?,?,?,?,?,?,?,?,?,?) ";
     public static String FIND_SQL = "select id,stock,cycle,open,close,high,low,date,volume,change_volume_rate,pe from stock_meta where stock = ? and cycle = ? and date = ?";
     public static String LIST_SQL = "select id,stock,cycle,open,close,high,low,date,volume,change_volume_rate,pe from stock_meta where stock = ? and cycle = ? order by date desc limit ?";
+    public static String DEL_SQL = "delete from stock_meta where stock = ?";
 
     public static void insert(StockMetaDO stockMetaDO){
         PreparedStatement d = null;
@@ -34,7 +36,7 @@ public class StockMetaDAOImpl {
             try {
                 if(d!=null) d.close();
             } catch (Exception ex) {
-				ex.printStackTrace();
+                ex.printStackTrace();
             }
         }
     }
@@ -119,6 +121,25 @@ public class StockMetaDAOImpl {
         return stockMetaDO;
     }
 
+    public static boolean deleteStockAllMetaRecords(String stockCode){
+        PreparedStatement d = null;
+        try {
+            d = StockDBManager.getStockConnection().prepareStatement(DEL_SQL);
+            d.setString(1,stockCode);
+            return d.execute();
+        }catch(Exception e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                if(d!=null) d.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return false;
+    }
+
     public static void main(String[] args){
 //        StockMetaDO stockMetaDO = new StockMetaDO();
 //        stockMetaDO.setStock("ABC");
@@ -133,10 +154,10 @@ public class StockMetaDAOImpl {
 //
 //        insert(stockMetaDO);
 
-        List<StockMetaDO> stockMetaDOs = list("AAPL",StockMetaDO.CycleType.DAY.name(), 10);
-        for(StockMetaDO s : stockMetaDOs){
-            System.out.println(s);
-        }
+//        List<StockMetaDO> stockMetaDOs = list("AAPL",StockMetaDO.CycleType.DAY.name(), 10);
+//        for(StockMetaDO s : stockMetaDOs){
+//            System.out.println(s);
+//        }
 
 //        StockMetaDO s = null;
 //        try {
@@ -146,6 +167,8 @@ public class StockMetaDAOImpl {
 //        }
 //        System.out.println(s);
 
+
+        deleteStockAllMetaRecords("AAPL");
     }
 
 }

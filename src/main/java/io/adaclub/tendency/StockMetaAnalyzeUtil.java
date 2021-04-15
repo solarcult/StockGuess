@@ -1,7 +1,7 @@
 package io.adaclub.tendency;
 
 import io.adaclub.db.StockAnalyzeDO;
-import io.adaclub.db.StockAnaylzeDAOImpl;
+import io.adaclub.db.StockAnalyzeDAOImpl;
 import io.adaclub.db.StockMetaDAOImpl;
 import io.adaclub.db.StockMetaDO;
 import io.adaclub.framework.RecallFrameWork;
@@ -35,7 +35,7 @@ public class StockMetaAnalyzeUtil {
 
             StockMetaDO now = stockMetaDOs.get(i);
 //            System.out.println("true today: " + now);
-            StockAnalyzeDO old = StockAnaylzeDAOImpl.findByStockStuff(now.getId(),now.getStock(),now.getCycle(),X);
+            StockAnalyzeDO old = StockAnalyzeDAOImpl.findByStockStuff(now.getId(),now.getStock(),now.getCycle(),X);
             if(old!=null){
                 //已经算出来过,不用再计算了
                 continue;
@@ -102,7 +102,7 @@ public class StockMetaAnalyzeUtil {
             stockAnalyzeDO.setStock(lastDay.getStock());
             stockAnalyzeDO.setxDays(X);
 
-            StockAnaylzeDAOImpl.insert(stockAnalyzeDO);
+            StockAnalyzeDAOImpl.insert(stockAnalyzeDO);
             System.out.println("insert analyze: "+ stockAnalyzeDO);
 
         }
