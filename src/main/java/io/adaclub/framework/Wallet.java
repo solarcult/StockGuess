@@ -5,33 +5,40 @@ package io.adaclub.framework;
  */
 public class Wallet {
 
-    private double myWallet;
+    //起始资金
+    public static int StartMoney = 100000;
 
-    public Wallet(double wallet){
-        this.myWallet = wallet;
+    private double leftMoney;
+
+    public Wallet(double totalMoney){
+        this.leftMoney = totalMoney;
+    }
+
+    public boolean canSpend(double spend){
+        return leftMoney >= spend;
     }
 
     public double spend(double spend){
-        if(spend > myWallet){
+        if(spend > leftMoney){
             throw new RuntimeException("Don'T Have Enough Money. :(");
         }
-        myWallet -= spend;
-        return myWallet;
+        leftMoney -= spend;
+        return leftMoney;
     }
 
     public double fund(double fund){
-        myWallet += fund;
-        return myWallet;
+        leftMoney += fund;
+        return leftMoney;
     }
 
-    public double getMyLeftMoney() {
-        return myWallet;
+    public double getLeftMoney() {
+        return leftMoney;
     }
 
     @Override
     public String toString() {
         return "Wallet{" +
-                "myWallet=" + myWallet +
+                "myWallet=" + leftMoney +
                 '}';
     }
 }

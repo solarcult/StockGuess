@@ -23,6 +23,10 @@ public class BollCloseBuyPositionImpl implements CloseBuyPosition {
 
         StockAnalyzeDO todaySAOSellAvg = StockAnalyzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(),sellAvg);
 
+        if(todaySAOSellAvg == null){
+            System.out.println("BollCloseBuyPositionImpl is null "+ today.getId()+" "+today.getStock()+" "+sellAvg);
+            return NotClose;
+        }
         if(today.getClose() < todaySAOSellAvg.getLowMean() - 2 * todaySAOSellAvg.getLowSd()){
             TendencyUtil.WaveStatus waveStatus = TendencyUtil.waveHighLow(histories,today);
             if(RecallFrameWork.DEBUG) {

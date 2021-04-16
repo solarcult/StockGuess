@@ -3,6 +3,7 @@ package io.adaclub.framework.test;
 import io.adaclub.db.StockMetaDAOImpl;
 import io.adaclub.db.StockMetaDO;
 import io.adaclub.framework.RecallFrameWork;
+import io.adaclub.framework.RecallResult;
 import io.adaclub.framework.XPosition;
 import io.adaclub.tendency.TurtleCloseBuyPositionImpl;
 import io.adaclub.tendency.TurtleOpenBuyPositionImpl;
@@ -16,7 +17,8 @@ public class TurtleTest {
         String stockCode = "QQQ";
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
-        List<XPosition> positions = RecallFrameWork.goThrough(stockMetaDOs,new TurtleOpenBuyPositionImpl(),new TurtleCloseBuyPositionImpl());
+        RecallResult result = RecallFrameWork.goThrough(stockMetaDOs,new TurtleOpenBuyPositionImpl(),new TurtleCloseBuyPositionImpl(),true);
+        List<XPosition> positions = result.getPositions();
         System.out.println("\nGo through: ");
         for(XPosition xPosition : positions){
             System.out.println(xPosition);

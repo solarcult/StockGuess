@@ -32,8 +32,14 @@ public class BollOpenBuyPositionImpl implements OpenBuyPosition {
             return NotBuy;
         }
         StockAnalyzeDO todaySAO20 = StockAnalyzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(),longAvg);
+        if(todaySAO20==null){
+            System.out.println("BollOpenBuyPositionImpl longAvg is null "+today.getId() +" "+today.getStock() +" "+longAvg);
+        }
         List<StockAnalyzeDO> stockAnalyzeDOs5 =  StockAnalyzeDAOImpl.list(ids,today.getStock(),StockMetaDO.CycleType.DAY.name(), RecallFrameWork.Period_Days_5);
         StockAnalyzeDO todaySAO5 = StockAnalyzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(), shortAvg);
+        if(todaySAO5==null){
+            System.out.println("BollOpenBuyPositionImpl shortAvg is null "+today.getId() +" "+today.getStock() +" "+shortAvg);
+        }
 
         //计算20日均线状态
         TendencyUtil.WaveStatus waveStatus20 = TendencyUtil.waveAverageClose(stockAnalyzeDOs20,todaySAO20);

@@ -8,10 +8,11 @@ import io.adaclub.tendency.TurtleOpenBuyPositionImpl;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.time.TimeSeriesDataItem;
 import org.jfree.data.xy.XYDataset;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class RecallFrameWork {
@@ -24,10 +25,6 @@ public class RecallFrameWork {
 
     //每手股数
     public static int takeOneHand = 100;
-    //最大允许持有手数
-    public static int maxHand = 50;
-    //起始资金
-    public static int StartMoney = 20000000;
     //画图时的类型展示文字用
     public static String chartType;
 
@@ -39,13 +36,14 @@ public class RecallFrameWork {
      * @param openBuyPositionImpl openBuyPositionImpl
      * @param closeBuyPositionImpl closeBuyPositionImpl
      */
-    public static List<XPosition> goThrough(List<StockMetaDO> stockMetaDOs, OpenBuyPosition openBuyPositionImpl, CloseBuyPosition closeBuyPositionImpl){
-        Wallet myWallet = new Wallet(StartMoney);
+    public static RecallResult goThrough(List<StockMetaDO> stockMetaDOs, OpenBuyPosition openBuyPositionImpl, CloseBuyPosition closeBuyPositionImpl,boolean isPrintChart){
+        Wallet myWallet = new Wallet(Wallet.StartMoney);
         List<XPosition> positions = new ArrayList<>();
+        List<RecallResult.ProfitPack> profitPacks = new ArrayList<>();
         String stockName = stockMetaDOs.get(0).getStock();
         TimeSeries series = new TimeSeries(stockName);
 
-        for(int i = openBuyPositionImpl.getPeriod(); i < stockMetaDOs.size(); i++){
+        for(int i = MAX_PERIOD_DAYS; i < stockMetaDOs.size(); i++){
 
             XPosition nowPositionStatus = XPosition.positionStatus(positions);
 
@@ -88,20 +86,13 @@ public class RecallFrameWork {
                 }
             }
 
-            int leftCanBuyNumber = maxHand * takeOneHand - nowPositionStatus.getQuantity();
-            if (buyPosition.isBuy() && leftCanBuyNumber > 0 ) {
-
-                //计算手数是否超过最大允许值
-                if(buyPosition.getMany() > leftCanBuyNumber){
-                    System.out.println(" Left Hand WARNING USED MAX Hand : " + stockName +" : " +buyPosition.getMany() +" -> " + leftCanBuyNumber);
-                    buyPosition.setMany(leftCanBuyNumber);
-                }
-
+            if (buyPosition.isBuy()) {
                 //计算钱是否够用
                 double spend = actionPrice * buyPosition.getMany();
-                if(myWallet.getMyLeftMoney() < spend){
-                    int canBuyNumber = (int) Math.floor(myWallet.getMyLeftMoney() / actionPrice);
-                    System.out.println(" $ WARNING NOT ENOUGH Money : " + stockName+" left $: " + myWallet.getMyLeftMoney() +" change: " + buyPosition.getMany() + " -> " + canBuyNumber );
+                if(!myWallet.canSpend(spend)){
+                    //如果买不起,计算一下到底能买起多少股
+                    int canBuyNumber = (int) Math.floor(myWallet.getLeftMoney() / actionPrice);
+                    System.out.println(" $ WARNING NOT ENOUGH Money : " + stockName+" left $: " + myWallet.getLeftMoney() +" change: " + buyPosition.getMany() + " -> " + canBuyNumber );
                     buyPosition.setMany(canBuyNumber);
                 }
 
@@ -131,30 +122,28 @@ public class RecallFrameWork {
 
             //进行数据整理绘图
             Day day = new Day(today.getDate());
-
-//            XPosition result = XPosition.positionStatus(positions);
-//            series.add(day,myWallet.getMyWallet() + today.getClose() * result.getQuantity());
-
-            series.add(day,XPosition.totalProfit(positions,today) );
+            double profit = XPosition.totalProfit(positions,today);
+            TimeSeriesDataItem t = new TimeSeriesDataItem(day,profit);
+            series.add(t);
+            profitPacks.add(new RecallResult.ProfitPack(today.getDate(),profit));
         }
 
-//        XYDataset dataset = new TimeSeriesCollection(series);
-//        TimeSeriesChart timeSeriesChart = new TimeSeriesChart(stockName+" "+chartType,dataset);
-//        timeSeriesChart.pack();
-//        timeSeriesChart.setVisible(true);
+        if(isPrintChart) {
+            TimeSeriesChart timeSeriesChart = new TimeSeriesChart(stockName + " " + chartType, new TimeSeriesCollection(series));
+        }
 
-        return positions;
+        return new RecallResult(positions,profitPacks);
     }
 
     public static void main(String[] args){
         String stockCode = "VT";
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
-        List<XPosition> positions =  goThrough(stockMetaDOs,new TurtleOpenBuyPositionImpl(),new TurtleCloseBuyPositionImpl());
-        for(XPosition xPosition : positions){
+        RecallResult result =  goThrough(stockMetaDOs,new TurtleOpenBuyPositionImpl(),new TurtleCloseBuyPositionImpl(),true);
+        for(XPosition xPosition : result.getPositions()){
             System.out.println(xPosition);
         }
-        System.out.println("Profit : "+XPosition.totalProfit(positions,today));
+        System.out.println("Profit : "+XPosition.totalProfit(result.getPositions(), today));
     }
 
 }
