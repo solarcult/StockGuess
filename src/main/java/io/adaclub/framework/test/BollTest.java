@@ -19,23 +19,25 @@ public class BollTest {
 
     public static void main(String[] args){
         RecallFrameWork.chartType = "Boll";
-        String stockCode = "SPY";
+        String stockCode = "HAS";
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
         //将0位置变为时间最远的数据,方便编码理解,0代表过去,size()的位置代表现在
         Collections.reverse(stockMetaDOs);
 
-//        BestOne bestOne = tryOnce(stockMetaDOs,today,5,20,20,true);
-//        System.out.println(bestOne.getMaxRetracement());
+//        BestOne bestOne = tryOnce(stockMetaDOs,today,3,9,9,true);
+//        System.out.println(bestOne.getMaxRetracement()+" vs "+bestOne.getEarnMoney());
 
         findBestOne(stockMetaDOs, today);
     }
 
     private static void findBestOne(List<StockMetaDO> stockMetaDOs, StockMetaDO today) {
         long astart = System.currentTimeMillis();
+        StringBuilder w2f = new StringBuilder();
+        w2f.append(Calendar.getInstance().getTime()).append("\n");
         List<BestOne> bestOnes = new ArrayList<>();
         List<CompletableFuture<Void>> lotOfCpuS = new ArrayList<>();
-        int step = 3;
+        int step = 10;
         String stockName = stockMetaDOs.get(0).getStock();
         AtomicInteger count = new AtomicInteger();
         AtomicLong totalSpendTime = new AtomicLong();
@@ -60,13 +62,13 @@ public class BollTest {
                         long end = System.currentTimeMillis();
                         long totalSpt = totalSpendTime.addAndGet(end-start)/1000;
                         long avg = totalSpt/fc;
-                        System.out.println(finalI + ":" +finalJ+":"+finalK + " done. -> "+fc+"/"+total +" \tleft Min : " + ((total-fc)*avg)/60 + " , \tspend Seconds: "+ totalSpt+" \t avg: " + avg);
+                        System.out.println(Calendar.getInstance().getTime() +" : "+finalI + ":" +finalJ+":"+finalK + " done. -> "+fc+"/"+total +" \tleft Min : " + ((total-fc)*avg)/60 + " , \tspend Seconds: "+ totalSpt+" \t avg: " + avg);
                     });
                     lotOfCpuS.add(completableFuture);
                 }
             }
         }
-        System.out.println("initial "+total+" done. Good Luck boy. :)");
+        System.out.println(Calendar.getInstance().getTime()+" : initial "+total+" done. Good Luck boy. :)");
 
         CompletableFuture<Void> all = CompletableFuture.allOf(lotOfCpuS.toArray(new CompletableFuture[0]));
         all.join();
@@ -100,16 +102,16 @@ public class BollTest {
         new XYMChart(stockName,xydataset);
 
         Collections.sort(seekParetoFronts);
-        StringBuilder sb = new StringBuilder();
+
         for (Pareto pareto : seekParetoFronts){
-            sb.append(pareto);
-            sb.append("\n");
+            w2f.append(pareto);
+            w2f.append("\n");
             System.out.println(pareto);
         }
         long aend = System.currentTimeMillis();
-        sb.append("All done , Sir ! Spent life : ").append((aend - astart) / 1000).append(" seconds. We got: ").append(seekParetoFronts.size());
-        System.out.println("All done , Sir ! Spent life : "+(aend-astart)/1000 +" seconds. We got: "+seekParetoFronts.size());
-        FileUtil.write2disk(stockName,sb.toString());
+        w2f.append(Calendar.getInstance().getTime()).append(" : All done , Sir ! Spent life : ").append((aend - astart) / 1000).append(" seconds. We got: ").append(seekParetoFronts.size());
+        System.out.println(Calendar.getInstance().getTime()+" : All done , Sir ! Spent life : "+(aend-astart)/1000 +" seconds. We got: "+seekParetoFronts.size());
+        FileUtil.write2disk(stockName,w2f.toString());
     }
 
     public static BestOne tryOnce(List<StockMetaDO> stockMetaDOs,StockMetaDO today, int openShortAvg, int openLongAvg, int closeLongAvg,boolean isPrintChart){

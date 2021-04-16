@@ -3,10 +3,8 @@ package io.adaclub;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ForkJoinPool;
 
 public class FileUtil {
 
@@ -18,7 +16,7 @@ public class FileUtil {
         try {
             String time = sdf.format(Calendar.getInstance().getTime());
             BufferedWriter out=new BufferedWriter(new FileWriter(filename+"_"+time+".sy",false));
-            out.write(time + "\n");
+            out.write("\n");
             out.newLine();
             out.write(whatiwant2records);
             out.newLine();

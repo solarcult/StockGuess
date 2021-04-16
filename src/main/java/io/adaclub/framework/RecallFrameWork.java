@@ -23,8 +23,6 @@ public class RecallFrameWork {
     public static int MIN_PERIOD_DAYS = 3;
     public static int MAX_PERIOD_DAYS = 60;
 
-    //每手股数
-    public static int takeOneHand = 100;
     //画图时的类型展示文字用
     public static String chartType;
 
@@ -38,6 +36,7 @@ public class RecallFrameWork {
      */
     public static RecallResult goThrough(List<StockMetaDO> stockMetaDOs, OpenBuyPosition openBuyPositionImpl, CloseBuyPosition closeBuyPositionImpl,boolean isPrintChart){
         Wallet myWallet = new Wallet(Wallet.StartMoney);
+        myWallet.moreHands = true;
         List<XPosition> positions = new ArrayList<>();
         List<RecallResult.ProfitPack> profitPacks = new ArrayList<>();
         String stockName = stockMetaDOs.get(0).getStock();
@@ -58,14 +57,16 @@ public class RecallFrameWork {
             if(tomorrow != null){
                 actionPrice = tomorrow.getOpen();
             }
-
+            OpenBuyPosition.BuyPosition buyPosition = OpenBuyPosition.NotBuy;
             CloseBuyPosition.ClosePosition closePosition = CloseBuyPosition.NotClose;
             //判断是否需要平仓
             if(nowPositionStatus.getQuantity() > 0) {
                 closePosition = closeBuyPositionImpl.closeBuyPosition(stockMetaDOs.subList(i - closeBuyPositionImpl.getPeriod(), i), today,nowPositionStatus);
             }
-            //判断是否要开仓
-            OpenBuyPosition.BuyPosition buyPosition = openBuyPositionImpl.toBuyOrNotToBuy(stockMetaDOs.subList(i - openBuyPositionImpl.getPeriod(), i), today);
+            if(nowPositionStatus.getQuantity() <= 0 || myWallet.moreHands) {
+                //判断是否要开仓
+                buyPosition = openBuyPositionImpl.toBuyOrNotToBuy(stockMetaDOs.subList(i - openBuyPositionImpl.getPeriod(), i), today);
+            }
 
             //综合考虑怎么办
             if(buyPosition.isBuy() && closePosition.isClose()){

@@ -12,19 +12,19 @@ import java.util.List;
 public class BollCloseBuyPositionImpl implements CloseBuyPosition {
 
     //卖出点的x日均线
-    int sellAvg;
+    int closeAvg;
 
     public BollCloseBuyPositionImpl(int sellAvg){
-        this.sellAvg = sellAvg;
+        this.closeAvg = sellAvg;
     }
 
     @Override
     public ClosePosition closeBuyPosition(List<StockMetaDO> histories, StockMetaDO today, XPosition nowPosition) {
 
-        StockAnalyzeDO todaySAOSellAvg = StockAnalyzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(),sellAvg);
+        StockAnalyzeDO todaySAOSellAvg = StockAnalyzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(), getPeriod());
 
         if(todaySAOSellAvg == null){
-            System.out.println("BollCloseBuyPositionImpl is null "+ today.getId()+" "+today.getStock()+" "+sellAvg);
+            System.out.println("BollCloseBuyPositionImpl is null "+ today.getId()+" "+today.getStock()+" "+ getPeriod());
             return NotClose;
         }
         if(today.getClose() < todaySAOSellAvg.getLowMean() - 2 * todaySAOSellAvg.getLowSd()){
@@ -51,13 +51,13 @@ public class BollCloseBuyPositionImpl implements CloseBuyPosition {
 
     @Override
     public int getPeriod() {
-        return RecallFrameWork.Period_Days_20;
+        return closeAvg;
     }
 
     @Override
     public String toString() {
         return "BollCloseBuyPositionImpl{" +
-                "sellAvg=" + sellAvg +
+                "closeAvg=" + closeAvg +
                 '}';
     }
 }

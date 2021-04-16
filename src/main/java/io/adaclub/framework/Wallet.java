@@ -6,7 +6,11 @@ package io.adaclub.framework;
 public class Wallet {
 
     //起始资金
-    public static int StartMoney = 100000;
+    public static int StartMoney = 5000;
+    //每手股数
+    public static int takeOneHand = 10;
+
+    public boolean moreHands = true;
 
     private double leftMoney;
 
@@ -35,10 +39,19 @@ public class Wallet {
         return leftMoney;
     }
 
+    public boolean isMoreHands() {
+        return moreHands;
+    }
+
+    public void setMoreHands(boolean moreHands) {
+        this.moreHands = moreHands;
+    }
+
     @Override
     public String toString() {
         return "Wallet{" +
-                "myWallet=" + leftMoney +
+                "moreHands=" + moreHands +
+                ", leftMoney=" + leftMoney +
                 '}';
     }
 }

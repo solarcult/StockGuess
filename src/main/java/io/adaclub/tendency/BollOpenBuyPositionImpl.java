@@ -5,6 +5,7 @@ import io.adaclub.db.StockAnalyzeDAOImpl;
 import io.adaclub.db.StockMetaDO;
 import io.adaclub.framework.OpenBuyPosition;
 import io.adaclub.framework.RecallFrameWork;
+import io.adaclub.framework.Wallet;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,7 +36,6 @@ public class BollOpenBuyPositionImpl implements OpenBuyPosition {
         if(todaySAO20==null){
             System.out.println("BollOpenBuyPositionImpl longAvg is null "+today.getId() +" "+today.getStock() +" "+longAvg);
         }
-        List<StockAnalyzeDO> stockAnalyzeDOs5 =  StockAnalyzeDAOImpl.list(ids,today.getStock(),StockMetaDO.CycleType.DAY.name(), RecallFrameWork.Period_Days_5);
         StockAnalyzeDO todaySAO5 = StockAnalyzeDAOImpl.findByStockStuff(today.getId(),today.getStock(),StockMetaDO.CycleType.DAY.name(), shortAvg);
         if(todaySAO5==null){
             System.out.println("BollOpenBuyPositionImpl shortAvg is null "+today.getId() +" "+today.getStock() +" "+shortAvg);
@@ -58,10 +58,11 @@ public class BollOpenBuyPositionImpl implements OpenBuyPosition {
                 ) {
                 if(RecallFrameWork.DEBUG) {
                     System.out.println("\nbuy 20 : " + waveStatus20);
+                    List<StockAnalyzeDO> stockAnalyzeDOs5 =  StockAnalyzeDAOImpl.list(ids,today.getStock(),StockMetaDO.CycleType.DAY.name(), RecallFrameWork.Period_Days_5);
                     System.out.println("buy 05 : " + TendencyUtil.waveAverageClose(stockAnalyzeDOs5, todaySAO5));
                     System.out.println("buy 5low:" + todaySAO5.getLowMean() + " >5lm-sd " + (todaySAO5.getLowMean() - todaySAO5.getLowSd()) + " >meclose: " + today.getClose() + " >20lm-sd: " + (todaySAO20.getLowMean() - todaySAO20.getLowSd()) + " >20lm-2sd: " + (todaySAO20.getLowMean() - 2 * todaySAO20.getLowSd()) + "\n");
                 }
-                return new BuyPosition(true, RecallFrameWork.takeOneHand);
+                return new BuyPosition(true, Wallet.takeOneHand);
             }
         }
 
