@@ -19,7 +19,6 @@ public class BollTest {
 
     public static void main(String[] args){
         RecallFrameWork.chartType = "Boll";
-        Wallet wallet = new Wallet();
         String stockCode = "MSFT";
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
@@ -29,17 +28,19 @@ public class BollTest {
 //        BestOne bestOne = tryOnce(stockMetaDOs,today,3,9,9,true);
 //        System.out.println(bestOne.getMaxRetracement()+" vs "+bestOne.getEarnMoney());
 
-        findBestOne(stockMetaDOs, today,wallet);
+        findBestOne(stockMetaDOs, today);
     }
 
-    private static void findBestOne(List<StockMetaDO> stockMetaDOs, StockMetaDO today,Wallet wallet) {
+    public static int MultiRetracementValue = 100;
+
+    private static void findBestOne(List<StockMetaDO> stockMetaDOs, StockMetaDO today) {
         long astart = System.currentTimeMillis();
         StringBuilder w2f = new StringBuilder();
         w2f.append(Calendar.getInstance().getTime()).append("\n");
-        w2f.append(wallet.toString()).append("\n");
+        w2f.append(new Wallet()).append("\n");
         List<BestOne> bestOnes = new ArrayList<>();
         List<CompletableFuture<Void>> lotOfCpuS = new ArrayList<>();
-        int step = 3;
+        int step = 8;
         String stockName = stockMetaDOs.get(0).getStock();
         AtomicInteger count = new AtomicInteger();
         AtomicLong totalSpendTime = new AtomicLong();
@@ -58,13 +59,13 @@ public class BollTest {
                     int finalK = k;
                     CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(()->{
                         long start = System.currentTimeMillis();
-                        BestOne bestOne = tryOnce(stockMetaDOs, today,wallet,finalI,finalJ,finalK,false);
+                        BestOne bestOne = tryOnce(stockMetaDOs, today,new Wallet(),finalI,finalJ,finalK,false);
                         bestOnes.add(bestOne);
                         int fc = count.incrementAndGet();
                         long end = System.currentTimeMillis();
                         long totalSpt = totalSpendTime.addAndGet(end-start)/1000;
                         long avg = totalSpt/fc;
-                        System.out.println(Calendar.getInstance().getTime() +" : "+finalI + ":" +finalJ+":"+finalK + " done. -> "+fc+"/"+total +" \tleft Min : " + ((total-fc)*avg)/60 + " , \tspend Seconds: "+ totalSpt+" \t avg: " + avg + " | "+bestOne.getEarnMoney() +" <e-r> "+ bestOne.getMaxRetracement()*10000);
+                        System.out.println(Calendar.getInstance().getTime() +" : "+finalI + ":" +finalJ+":"+finalK + " done. -> "+fc+"/"+total +" \tleft Min : " + ((total-fc)*avg)/60 + " , \tspend Seconds: "+ totalSpt+" \t avg: " + avg + " | "+bestOne.getResult().getProfit() +" <e-r> "+ bestOne.getResult().getMaxRetracement()*MultiRetracementValue);
                     });
                     lotOfCpuS.add(completableFuture);
                 }
@@ -77,7 +78,7 @@ public class BollTest {
 
         List<Pareto> paretos = new ArrayList<>();
         for(BestOne one : bestOnes){
-            paretos.add(new Pareto((int) Math.ceil(one.getMaxRetracement()*10000),(int)one.getEarnMoney(),one));
+            paretos.add(new Pareto((int) Math.ceil(one.getResult().getMaxRetracement()* MultiRetracementValue),(int)one.getResult().getProfit(),one));
         }
         Map<Integer,List<Pareto>> seekParetoFrontMap = new HashMap<>();
         List<Pareto> seekParetoFronts = new ArrayList<>();
@@ -90,6 +91,9 @@ public class BollTest {
         for(List<Pareto> eachParetos : seekParetoFrontMap.values()){
             Collections.sort(eachParetos);
             seekParetoFronts.add(eachParetos.get(0));
+            System.out.println();
+            System.out.println(eachParetos.get(0));
+            System.out.println(eachParetos.get(eachParetos.size()-1));
         }
 
         double[][] data=new double[2][seekParetoFronts.size()];
@@ -108,7 +112,7 @@ public class BollTest {
         for (Pareto pareto : seekParetoFronts){
             w2f.append(pareto);
             w2f.append("\n");
-            System.out.println(pareto);
+//            System.out.println(pareto);
         }
         long aend = System.currentTimeMillis();
         w2f.append(Calendar.getInstance().getTime()).append(" : All done , Sir ! Spent life : ").append((aend - astart) / 1000).append(" seconds. We got: ").append(seekParetoFronts.size());
@@ -122,17 +126,16 @@ public class BollTest {
         CloseBuyPosition closeBuyPosition = new BollCloseBuyPositionImpl(closeLongAvg);
         RecallResult result = RecallFrameWork.goThrough(stockMetaDOs, openBuyPosition, closeBuyPosition,wallet,isPrintChart);
         List<XPosition> positions = result.getPositions();
-        double profit = XPosition.totalProfit(positions, today);
         if (RecallFrameWork.DEBUG) {
             System.out.println("\nGo through: ");
             for (XPosition xPosition : positions) {
                 System.out.println(xPosition);
             }
             System.out.println("\nTotalSize : " + positions.size());
-            System.out.println("Profit : " + profit);
+            System.out.println("Profit : " + result.getProfit());
         }
 
-        return new BestOne(openBuyPosition.toString(), closeBuyPosition.toString(), profit, result);
+        return new BestOne(openBuyPosition.toString(), closeBuyPosition.toString(), result);
     }
 
     static class Pareto implements Comparable<Pareto>{

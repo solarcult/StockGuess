@@ -66,7 +66,7 @@ public class RecallFrameWork {
                 buyPosition = openBuyPositionImpl.toBuyOrNotToBuy(stockMetaDOs.subList(i - openBuyPositionImpl.getPeriod(), i), today);
             }
 
-            //综合考虑怎么办
+            //算出来又买又卖怎么办?综合考虑一下.
             if(buyPosition.isBuy() && closePosition.isClose()){
                 int finalQuantity = buyPosition.getMany() - closePosition.getMany();
                 if(finalQuantity > 0){
@@ -121,14 +121,17 @@ public class RecallFrameWork {
 
             //进行数据整理绘图
             Day day = new Day(today.getDate());
+            //经历了上面一大堆的操作以后,进行仓位分析.
+            XPosition inNightPositions = XPosition.positionStatus(positions);
+            double capitalStockValue = inNightPositions.getQuantity() * today.getClose();
             double profit = XPosition.totalProfit(positions,today);
             TimeSeriesDataItem t = new TimeSeriesDataItem(day,profit);
             series.add(t);
-            profitPacks.add(new RecallResult.ProfitPack(today.getDate(),profit));
+            profitPacks.add(new RecallResult.ProfitPack(today.getDate(),capitalStockValue,profit));
         }
 
         if(isPrintChart) {
-            TimeSeriesChart timeSeriesChart = new TimeSeriesChart(stockName + " " + chartType, new TimeSeriesCollection(series));
+            new TimeSeriesChart(stockName + " " + chartType, new TimeSeriesCollection(series));
         }
 
         return new RecallResult(positions,profitPacks);

@@ -6,16 +6,12 @@ import io.adaclub.framework.RecallResult;
 public class BestOne implements Comparable<BestOne>{
     String openDescribe;
     String closeDescribe;
-    double earnMoney;
-    double maxRetracement;
     RecallResult result;
 
-    public BestOne(String openDescribe, String closeDescribe, double earnMoney, RecallResult result){
+    public BestOne(String openDescribe, String closeDescribe, RecallResult result){
         this.openDescribe = openDescribe;
         this.closeDescribe = closeDescribe;
-        this.earnMoney = earnMoney;
         this.result = result;
-        this.maxRetracement = result.calcMaxRetracement();
     }
 
     public String getOpenDescribe() {
@@ -34,26 +30,18 @@ public class BestOne implements Comparable<BestOne>{
         this.closeDescribe = closeDescribe;
     }
 
-    public double getEarnMoney() {
-        return earnMoney;
-    }
-
-    public void setEarnMoney(double earnMoney) {
-        this.earnMoney = earnMoney;
-    }
-
     @Override
     public int compareTo(BestOne o) {
         //先看回撤
-        if(this.maxRetracement < o.maxRetracement){
+        if(this.result.getMaxRetracement() < o.result.getMaxRetracement()){
             return -1;
-        }else if(this.maxRetracement > o.maxRetracement){
+        }else if(this.result.getMaxRetracement() > o.result.getMaxRetracement()){
             return 1;
         }
         //如果回撤相同,则看收益
-        if(this.earnMoney > o.earnMoney){
+        if(this.result.getProfit() > o.result.getProfit()){
             return -1;
-        }else if(this.earnMoney < o.earnMoney){
+        }else if(this.result.getProfit() < o.result.getProfit()){
             return 1;
         }
 
@@ -68,17 +56,12 @@ public class BestOne implements Comparable<BestOne>{
         this.result = result;
     }
 
-    public double getMaxRetracement() {
-        return maxRetracement;
-    }
 
     @Override
     public String toString() {
         return "BestOne{" +
-                "openDescribe='" + openDescribe + '\'' +
-                ", closeDescribe='" + closeDescribe + '\'' +
-                ", earnMoney=" + earnMoney +
-                ", maxRetracement=" + maxRetracement +
+                "open='" + openDescribe + '\'' +
+                ", close='" + closeDescribe + '\'' +
                 ", result=" + result +
                 '}';
     }
