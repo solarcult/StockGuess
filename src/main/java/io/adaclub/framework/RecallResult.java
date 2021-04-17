@@ -8,15 +8,19 @@ public class RecallResult {
     List<ProfitPack> profitPacks;
     double maxRetracement;
     double profit;
-    double capitalValue;
+    //总共花出去的钱
+    double capitalTotalSpent;
+    //花出去钱和收益,花了就算,理论上应该等于profit+capitalTotalSpent
+    double capitalAndProfitResult;
     double roi;
-    public RecallResult(List<XPosition> positions, List<ProfitPack> profitPacks){
+    public RecallResult(List<XPosition> positions, List<ProfitPack> profitPacks,double capitalTotalSpent){
         this.positions = positions;
         this.profitPacks = profitPacks;
         this.maxRetracement = calcMaxRetracement();
         this.profit = profitPacks.get(profitPacks.size()-1).getProfit();
-        this.capitalValue = profitPacks.get(profitPacks.size()-1).getCapitalStockValue();
-        this.roi = profit/capitalValue;
+        this.capitalTotalSpent = capitalTotalSpent;
+        this.capitalAndProfitResult = profitPacks.get(profitPacks.size()-1).getCapitalAndProfitResult();;
+        this.roi = profit/capitalTotalSpent;
     }
 
     public List<XPosition> getPositions() {
@@ -38,18 +42,9 @@ public class RecallResult {
     public double calcMaxRetracement(){
         double maxRetracement = 0;
         for(int i=0; i < profitPacks.size();i++){
-            double todayCapitalValue = profitPacks.get(i).getCapitalStockValue();
-            double profit = profitPacks.get(i).getProfit();
-            //还没下单时
-            if(profit == 0){
-                continue;
-            }
+            double todayCapitalValue = profitPacks.get(i).getCapitalAndProfitResult();
             for(int j = i+1; j < profitPacks.size();j++){
-                double nextDayCapitalValue = profitPacks.get(j).getCapitalStockValue();
-                //中间空仓时
-                if(nextDayCapitalValue == 0){
-                    continue;
-                }
+                double nextDayCapitalValue = profitPacks.get(j).getCapitalAndProfitResult();
                 double nowRetracement = (todayCapitalValue - nextDayCapitalValue) / todayCapitalValue;
                 if(nowRetracement > maxRetracement){
                     maxRetracement = nowRetracement;
@@ -75,25 +70,50 @@ public class RecallResult {
         this.profit = profit;
     }
 
+    public double getCapitalTotalSpent() {
+        return capitalTotalSpent;
+    }
+
+    public void setCapitalTotalSpent(double capitalTotalSpent) {
+        this.capitalTotalSpent = capitalTotalSpent;
+    }
+
+    public double getCapitalAndProfitResult() {
+        return capitalAndProfitResult;
+    }
+
+    public void setCapitalAndProfitResult(double capitalAndProfitResult) {
+        this.capitalAndProfitResult = capitalAndProfitResult;
+    }
+
+    public double getRoi() {
+        return roi;
+    }
+
+    public void setRoi(double roi) {
+        this.roi = roi;
+    }
+
     @Override
     public String toString() {
         return "RecallResult{" +
-                "positions=" + positions +
-                ", profitPacks=" + profitPacks +
-                ", maxRetracement=" + maxRetracement +
+                "maxRetracement=" + maxRetracement +
                 ", profit=" + profit +
-                ", capitalValue=" + capitalValue +
+                ", capitalTotalSpent=" + capitalTotalSpent +
+                ", capitalAndProfitResult=" + capitalAndProfitResult +
                 ", roi=" + roi +
+                "， positions=" + positions +
+                ", profitPacks=" + profitPacks +
                 '}';
     }
 
     public static class ProfitPack{
         Date date;
         double profit;
-        double capitalStockValue;
-        public ProfitPack(Date date,double capitalStockValue, double profit){
+        double capitalAndProfitResult;
+        public ProfitPack(Date date,double capitalAndProfitResult, double profit){
             this.date = date;
-            this.capitalStockValue = capitalStockValue;
+            this.capitalAndProfitResult = capitalAndProfitResult;
             this.profit = profit;
 
         }
@@ -114,20 +134,20 @@ public class RecallResult {
             this.profit = profit;
         }
 
-        public double getCapitalStockValue() {
-            return capitalStockValue;
+        public double getCapitalAndProfitResult() {
+            return capitalAndProfitResult;
         }
 
-        public void setCapitalStockValue(double capitalStockValue) {
-            this.capitalStockValue = capitalStockValue;
+        public void setCapitalAndProfitResult(double capitalAndProfitResult) {
+            this.capitalAndProfitResult = capitalAndProfitResult;
         }
 
         @Override
         public String toString() {
             return "ProfitPack{" +
                     "date=" + date +
-                    ", capitalStockValue=" + capitalStockValue +
                     ", profit=" + profit +
+                    ", capitalAndProfitResult=" + capitalAndProfitResult +
                     '}';
         }
     }

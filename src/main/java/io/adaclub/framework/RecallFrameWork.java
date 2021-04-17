@@ -9,10 +9,8 @@ import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.time.TimeSeriesDataItem;
-import org.jfree.data.xy.XYDataset;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class RecallFrameWork {
@@ -38,7 +36,8 @@ public class RecallFrameWork {
         List<XPosition> positions = new ArrayList<>();
         List<RecallResult.ProfitPack> profitPacks = new ArrayList<>();
         String stockName = stockMetaDOs.get(0).getStock();
-        TimeSeries series = new TimeSeries(stockName);
+        TimeSeries seriesProfits = new TimeSeries(stockName);
+        TimeSeries seriesCapitals = new TimeSeries(stockName);
 
         for(int i = MAX_PERIOD_DAYS; i < stockMetaDOs.size(); i++){
 
@@ -119,22 +118,29 @@ public class RecallFrameWork {
                 }
             }
 
-            //进行数据整理绘图
+            //经历了上面一大堆的操作以后,进行仓位分析,进行数据整理绘图
             Day day = new Day(today.getDate());
-            //经历了上面一大堆的操作以后,进行仓位分析.
-            XPosition inNightPositions = XPosition.positionStatus(positions);
-            double capitalStockValue = inNightPositions.getQuantity() * today.getClose();
+
             double profit = XPosition.totalProfit(positions,today);
-            TimeSeriesDataItem t = new TimeSeriesDataItem(day,profit);
-            series.add(t);
-            profitPacks.add(new RecallResult.ProfitPack(today.getDate(),capitalStockValue,profit));
+            TimeSeriesDataItem timeProfit = new TimeSeriesDataItem(day,profit);
+            seriesProfits.add(timeProfit);
+
+            XPosition inNightPositions = XPosition.positionStatus(positions);
+            double todayStockValue = inNightPositions.getQuantity() * today.getClose();
+            double capitalAll = wallet.getLeftUsedMoneyTotalCapitalAndProfit() + todayStockValue;
+            TimeSeriesDataItem timeCapital = new TimeSeriesDataItem(day,capitalAll);
+            seriesCapitals.add(timeCapital);
+
+            //record
+            profitPacks.add(new RecallResult.ProfitPack(today.getDate(),capitalAll,profit));
         }
 
         if(isPrintChart) {
-            new TimeSeriesChart(stockName + " " + chartType, new TimeSeriesCollection(series));
+            new TimeSeriesChart(stockName + " " + chartType + " Profits", new TimeSeriesCollection(seriesProfits));
+            new TimeSeriesChart(stockName + " " + chartType + " CapitalAndProfit-ALL",new TimeSeriesCollection(seriesCapitals));
         }
 
-        return new RecallResult(positions,profitPacks);
+        return new RecallResult(positions,profitPacks,wallet.getUsedMoneyTotalCapital());
     }
 
     public static void main(String[] args){
