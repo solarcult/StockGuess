@@ -65,7 +65,7 @@ public class BollTest {
                         long end = System.currentTimeMillis();
                         long totalSpt = totalSpendTime.addAndGet(end-start)/1000;
                         long avg = totalSpt/fc;
-                        System.out.println(Calendar.getInstance().getTime() +" : "+finalI + ":" +finalJ+":"+finalK + " done. -> "+fc+"/"+total +" \tleft Min : " + ((total-fc)*avg)/60 + " , \tspend Seconds: "+ totalSpt+" \t avg: " + avg + " | "+bestOne.getResult().getProfit() +" <e-r> "+ bestOne.getResult().getMaxRetracement()*MultiRetracementValue);
+                        System.out.println(Calendar.getInstance().getTime() +" : "+finalI + ":" +finalJ+":"+finalK + " done. -> "+fc+"/"+total +" \tleft Min : " + ((total-fc)*avg)/60 + " , \tspend Seconds: "+ totalSpt+" \t avg: " + avg + " | "+bestOne.getResult().getProfit() +" <e-r> "+ bestOne.getResult().getMaxRetracement()*MultiRetracementValue +" roi: "+bestOne.getResult().getRoi() * MultiRetracementValue);
                     });
                     lotOfCpuS.add(completableFuture);
                 }

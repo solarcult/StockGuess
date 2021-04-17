@@ -19,7 +19,7 @@ public class RRR {
         //将0位置变为时间最远的数据,方便编码理解,0代表过去,size()的位置代表现在
         Collections.reverse(stockMetaDOs);
         RecallFrameWork.DEBUG = true;
-        BestOne bestOne = BollTest.tryOnce(stockMetaDOs,today,wallet,27,57,9,true);
+        BestOne bestOne = BollTest.tryOnce(stockMetaDOs,today,wallet,11,25,41,true);
         System.out.println(bestOne.getResult().getMaxRetracement()*100+" , "+bestOne.getResult().getProfit()+" , "+bestOne.getResult().getRoi()*100);
     }
 }

@@ -47,6 +47,8 @@ public class Wallet {
         if(leftUsedMoneyTotalCapitalAndProfit - spend < 0){
             usedMoneyTotalCapital += spend - leftUsedMoneyTotalCapitalAndProfit;
             leftUsedMoneyTotalCapitalAndProfit = 0;
+        }else{
+            leftUsedMoneyTotalCapitalAndProfit -=spend;
         }
 
         return leftMoney;
