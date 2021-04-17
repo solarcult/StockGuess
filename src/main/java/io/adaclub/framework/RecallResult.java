@@ -102,8 +102,8 @@ public class RecallResult {
                 ", capitalTotalSpent=" + capitalTotalSpent +
                 ", capitalAndProfitResult=" + capitalAndProfitResult +
                 ", roi=" + roi +
-                "， positions=" + positions +
-                ", profitPacks=" + profitPacks +
+//                "， positions=" + positions +
+//                ", profitPacks=" + profitPacks +
                 '}';
     }
 
