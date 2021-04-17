@@ -19,8 +19,7 @@ public class BollTest {
 
     public static void main(String[] args){
         RecallFrameWork.chartType = "Boll";
-        Wallet wallet = new Wallet(Wallet.StartMoney);
-        wallet.moreHands = true;
+        Wallet wallet = new Wallet();
         String stockCode = "MSFT";
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
@@ -40,7 +39,7 @@ public class BollTest {
         w2f.append(wallet.toString()).append("\n");
         List<BestOne> bestOnes = new ArrayList<>();
         List<CompletableFuture<Void>> lotOfCpuS = new ArrayList<>();
-        int step = 10;
+        int step = 3;
         String stockName = stockMetaDOs.get(0).getStock();
         AtomicInteger count = new AtomicInteger();
         AtomicLong totalSpendTime = new AtomicLong();
@@ -65,7 +64,7 @@ public class BollTest {
                         long end = System.currentTimeMillis();
                         long totalSpt = totalSpendTime.addAndGet(end-start)/1000;
                         long avg = totalSpt/fc;
-                        System.out.println(Calendar.getInstance().getTime() +" : "+finalI + ":" +finalJ+":"+finalK + " done. -> "+fc+"/"+total +" \tleft Min : " + ((total-fc)*avg)/60 + " , \tspend Seconds: "+ totalSpt+" \t avg: " + avg);
+                        System.out.println(Calendar.getInstance().getTime() +" : "+finalI + ":" +finalJ+":"+finalK + " done. -> "+fc+"/"+total +" \tleft Min : " + ((total-fc)*avg)/60 + " , \tspend Seconds: "+ totalSpt+" \t avg: " + avg + " | "+bestOne.getEarnMoney() +" <e-r> "+ bestOne.getMaxRetracement()*10000);
                     });
                     lotOfCpuS.add(completableFuture);
                 }
@@ -78,7 +77,7 @@ public class BollTest {
 
         List<Pareto> paretos = new ArrayList<>();
         for(BestOne one : bestOnes){
-            paretos.add(new Pareto((int) Math.ceil(one.getMaxRetracement()*1000),(int)one.getEarnMoney(),one));
+            paretos.add(new Pareto((int) Math.ceil(one.getMaxRetracement()*10000),(int)one.getEarnMoney(),one));
         }
         Map<Integer,List<Pareto>> seekParetoFrontMap = new HashMap<>();
         List<Pareto> seekParetoFronts = new ArrayList<>();

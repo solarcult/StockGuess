@@ -61,7 +61,7 @@ public class RecallFrameWork {
             if(nowPositionStatus.getQuantity() > 0) {
                 closePosition = closeBuyPositionImpl.closeBuyPosition(stockMetaDOs.subList(i - closeBuyPositionImpl.getPeriod(), i), today,nowPositionStatus);
             }
-            if(nowPositionStatus.getQuantity() <= 0 || wallet.moreHands) {
+            if(nowPositionStatus.getQuantity() <= 0 || !wallet.isOnlyBuyOneHand()) {
                 //判断是否要开仓
                 buyPosition = openBuyPositionImpl.toBuyOrNotToBuy(stockMetaDOs.subList(i - openBuyPositionImpl.getPeriod(), i), today);
             }
@@ -136,8 +136,7 @@ public class RecallFrameWork {
 
     public static void main(String[] args){
         String stockCode = "VT";
-        Wallet wallet = new Wallet(Wallet.StartMoney);
-        wallet.moreHands = true;
+        Wallet wallet = new Wallet();
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
         RecallResult result =  goThrough(stockMetaDOs,new TurtleOpenBuyPositionImpl(),new TurtleCloseBuyPositionImpl(),wallet,true);

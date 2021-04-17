@@ -14,8 +14,7 @@ import java.util.List;
 public class BollOpenTurtleCloseTest {
 
     public static void main(String[] args){
-        Wallet wallet = new Wallet(Wallet.StartMoney);
-        wallet.moreHands = true;
+        Wallet wallet = new Wallet();
         String stockCode = "BABA";
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
