@@ -34,9 +34,7 @@ public class RecallFrameWork {
      * @param openBuyPositionImpl openBuyPositionImpl
      * @param closeBuyPositionImpl closeBuyPositionImpl
      */
-    public static RecallResult goThrough(List<StockMetaDO> stockMetaDOs, OpenBuyPosition openBuyPositionImpl, CloseBuyPosition closeBuyPositionImpl,boolean isPrintChart){
-        Wallet myWallet = new Wallet(Wallet.StartMoney);
-        myWallet.moreHands = true;
+    public static RecallResult goThrough(List<StockMetaDO> stockMetaDOs, OpenBuyPosition openBuyPositionImpl, CloseBuyPosition closeBuyPositionImpl, Wallet wallet, boolean isPrintChart){
         List<XPosition> positions = new ArrayList<>();
         List<RecallResult.ProfitPack> profitPacks = new ArrayList<>();
         String stockName = stockMetaDOs.get(0).getStock();
@@ -63,7 +61,7 @@ public class RecallFrameWork {
             if(nowPositionStatus.getQuantity() > 0) {
                 closePosition = closeBuyPositionImpl.closeBuyPosition(stockMetaDOs.subList(i - closeBuyPositionImpl.getPeriod(), i), today,nowPositionStatus);
             }
-            if(nowPositionStatus.getQuantity() <= 0 || myWallet.moreHands) {
+            if(nowPositionStatus.getQuantity() <= 0 || wallet.moreHands) {
                 //判断是否要开仓
                 buyPosition = openBuyPositionImpl.toBuyOrNotToBuy(stockMetaDOs.subList(i - openBuyPositionImpl.getPeriod(), i), today);
             }
@@ -90,20 +88,20 @@ public class RecallFrameWork {
             if (buyPosition.isBuy()) {
                 //计算钱是否够用
                 double spend = actionPrice * buyPosition.getMany();
-                if(!myWallet.canSpend(spend)){
+                if(!wallet.canSpend(spend)){
                     //如果买不起,计算一下到底能买起多少股
-                    int canBuyNumber = (int) Math.floor(myWallet.getLeftMoney() / actionPrice);
-                    System.out.println(" $ WARNING NOT ENOUGH Money : " + stockName+" left $: " + myWallet.getLeftMoney() +" change: " + buyPosition.getMany() + " -> " + canBuyNumber );
+                    int canBuyNumber = (int) Math.floor(wallet.getLeftMoney() / actionPrice);
+                    System.out.println(" $ WARNING NOT ENOUGH Money : " + stockName+" left $: " + wallet.getLeftMoney() +" change: " + buyPosition.getMany() + " -> " + canBuyNumber );
                     buyPosition.setMany(canBuyNumber);
                 }
 
                 if(buyPosition.getMany() > 0) {
-                    myWallet.spend(buyPosition.getMany() * actionPrice);
+                    wallet.spend(buyPosition.getMany() * actionPrice);
                     XPosition buyOneHand = new XPosition(XPosition.BuyOrSellType.BUY.name(), actionPrice, buyPosition.getMany(), today.getDate(), buyPosition.getDescribe());
                     positions.add(buyOneHand);
                     if(DEBUG) {
                         System.out.println(buyOneHand);
-                        System.out.println(myWallet);
+                        System.out.println(wallet);
                         System.out.println();
                     }
                 }
@@ -111,12 +109,12 @@ public class RecallFrameWork {
 
             if(closePosition.isClose()){
                 double fund = actionPrice * closePosition.getMany();
-                myWallet.fund(fund);
+                wallet.fund(fund);
                 XPosition closeBuyOneHand = new XPosition(XPosition.BuyOrSellType.SELL.name(), actionPrice, closePosition.getMany(),today.getDate(),closePosition.getDescribe());
                 positions.add(closeBuyOneHand);
                 if(DEBUG) {
                     System.out.println(closeBuyOneHand);
-                    System.out.println(myWallet);
+                    System.out.println(wallet);
                     System.out.println();
                 }
             }
@@ -138,9 +136,11 @@ public class RecallFrameWork {
 
     public static void main(String[] args){
         String stockCode = "VT";
+        Wallet wallet = new Wallet(Wallet.StartMoney);
+        wallet.moreHands = true;
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
-        RecallResult result =  goThrough(stockMetaDOs,new TurtleOpenBuyPositionImpl(),new TurtleCloseBuyPositionImpl(),true);
+        RecallResult result =  goThrough(stockMetaDOs,new TurtleOpenBuyPositionImpl(),new TurtleCloseBuyPositionImpl(),wallet,true);
         for(XPosition xPosition : result.getPositions()){
             System.out.println(xPosition);
         }

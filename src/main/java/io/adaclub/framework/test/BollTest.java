@@ -19,7 +19,9 @@ public class BollTest {
 
     public static void main(String[] args){
         RecallFrameWork.chartType = "Boll";
-        String stockCode = "HAS";
+        Wallet wallet = new Wallet(Wallet.StartMoney);
+        wallet.moreHands = true;
+        String stockCode = "MSFT";
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
         //将0位置变为时间最远的数据,方便编码理解,0代表过去,size()的位置代表现在
@@ -28,13 +30,14 @@ public class BollTest {
 //        BestOne bestOne = tryOnce(stockMetaDOs,today,3,9,9,true);
 //        System.out.println(bestOne.getMaxRetracement()+" vs "+bestOne.getEarnMoney());
 
-        findBestOne(stockMetaDOs, today);
+        findBestOne(stockMetaDOs, today,wallet);
     }
 
-    private static void findBestOne(List<StockMetaDO> stockMetaDOs, StockMetaDO today) {
+    private static void findBestOne(List<StockMetaDO> stockMetaDOs, StockMetaDO today,Wallet wallet) {
         long astart = System.currentTimeMillis();
         StringBuilder w2f = new StringBuilder();
         w2f.append(Calendar.getInstance().getTime()).append("\n");
+        w2f.append(wallet.toString()).append("\n");
         List<BestOne> bestOnes = new ArrayList<>();
         List<CompletableFuture<Void>> lotOfCpuS = new ArrayList<>();
         int step = 10;
@@ -56,7 +59,7 @@ public class BollTest {
                     int finalK = k;
                     CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(()->{
                         long start = System.currentTimeMillis();
-                        BestOne bestOne = tryOnce(stockMetaDOs, today,finalI,finalJ,finalK,false);
+                        BestOne bestOne = tryOnce(stockMetaDOs, today,wallet,finalI,finalJ,finalK,false);
                         bestOnes.add(bestOne);
                         int fc = count.incrementAndGet();
                         long end = System.currentTimeMillis();
@@ -97,9 +100,9 @@ public class BollTest {
             data[1][i] = seekParetoFronts.get(i).getEarn();
         }
 
-        DefaultXYDataset xydataset = new DefaultXYDataset ();
-        xydataset.addSeries("worksWell",data);
-        new XYMChart(stockName,xydataset);
+        DefaultXYDataset dataset = new DefaultXYDataset ();
+        dataset.addSeries("worksWell",data);
+        new XYMChart(stockName,dataset);
 
         Collections.sort(seekParetoFronts);
 
@@ -114,11 +117,11 @@ public class BollTest {
         FileUtil.write2disk(stockName,w2f.toString());
     }
 
-    public static BestOne tryOnce(List<StockMetaDO> stockMetaDOs,StockMetaDO today, int openShortAvg, int openLongAvg, int closeLongAvg,boolean isPrintChart){
+    public static BestOne tryOnce(List<StockMetaDO> stockMetaDOs,StockMetaDO today,Wallet wallet, int openShortAvg, int openLongAvg, int closeLongAvg,boolean isPrintChart){
 
         OpenBuyPosition openBuyPosition = new BollOpenBuyPositionImpl(openShortAvg, openLongAvg);
         CloseBuyPosition closeBuyPosition = new BollCloseBuyPositionImpl(closeLongAvg);
-        RecallResult result = RecallFrameWork.goThrough(stockMetaDOs, openBuyPosition, closeBuyPosition,isPrintChart);
+        RecallResult result = RecallFrameWork.goThrough(stockMetaDOs, openBuyPosition, closeBuyPosition,wallet,isPrintChart);
         List<XPosition> positions = result.getPositions();
         double profit = XPosition.totalProfit(positions, today);
         if (RecallFrameWork.DEBUG) {

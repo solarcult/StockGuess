@@ -6,9 +6,9 @@ package io.adaclub.framework;
 public class Wallet {
 
     //起始资金
-    public static int StartMoney = 5000;
+    public static int StartMoney = 20000;
     //每手股数
-    public static int takeOneHand = 10;
+    public static int takeOneHand = 2;
 
     public boolean moreHands = true;
 
