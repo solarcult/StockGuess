@@ -3,6 +3,7 @@ package io.adaclub;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.ui.ApplicationFrame;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -16,6 +17,10 @@ public class XYMChart extends ApplicationFrame {
         final JFreeChart chart = createChart(title,xyDataset);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setMouseZoomable( true , false );
+
+        XYTextAnnotation x1 = new XYTextAnnotation("test",3,3);
+        chart.getXYPlot().addAnnotation(x1);
+
         setContentPane(chartPanel);
         pack();
         setVisible(true);
