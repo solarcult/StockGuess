@@ -12,6 +12,8 @@ public interface OpenBuyPosition {
 
     int getPeriod();
 
+    String keyDescribe();
+
     class BuyPosition{
         private int many;
         private boolean isBuy;

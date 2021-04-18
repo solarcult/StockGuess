@@ -140,7 +140,7 @@ public class RecallFrameWork {
             new TimeSeriesChart(stockName + " " + chartType + " CapitalAndProfit-ALL",new TimeSeriesCollection(seriesCapitals));
         }
 
-        return new RecallResult(positions,profitPacks,wallet.getUsedMoneyTotalCapital());
+        return new RecallResult(positions,profitPacks,wallet.getUsedMoneyTotalCapital(),openBuyPositionImpl.keyDescribe(), closeBuyPositionImpl.keyDescribe());
     }
 
     public static void main(String[] args){

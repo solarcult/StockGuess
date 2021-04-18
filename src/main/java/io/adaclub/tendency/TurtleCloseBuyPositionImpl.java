@@ -22,4 +22,9 @@ public class TurtleCloseBuyPositionImpl implements CloseBuyPosition {
     public int getPeriod() {
         return RecallFrameWork.Period_Days_10;
     }
+
+    @Override
+    public String keyDescribe() {
+        return "c:"+getPeriod();
+    }
 }

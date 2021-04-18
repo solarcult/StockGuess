@@ -5,9 +5,9 @@ import io.adaclub.XYMChart;
 import io.adaclub.db.StockMetaDAOImpl;
 import io.adaclub.db.StockMetaDO;
 import io.adaclub.framework.*;
-import io.adaclub.tendency.BestOne;
 import io.adaclub.tendency.BollCloseBuyPositionImpl;
 import io.adaclub.tendency.BollOpenBuyPositionImpl;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import java.util.*;
@@ -38,34 +38,34 @@ public class BollTest {
         StringBuilder w2f = new StringBuilder();
         w2f.append(Calendar.getInstance().getTime()).append("\n");
         w2f.append(new Wallet()).append("\n");
-        List<BestOne> bestOnes = new ArrayList<>();
+        List<RecallResult> recallResults = new ArrayList<>();
         List<CompletableFuture<Void>> lotOfCpuS = new ArrayList<>();
-        int step = 8;
+        int step = 15;
         String stockName = stockMetaDOs.get(0).getStock();
         AtomicInteger count = new AtomicInteger();
         AtomicLong totalSpendTime = new AtomicLong();
         int totalt = 0;
-        for(int i=RecallFrameWork.MIN_PERIOD_DAYS; i <= RecallFrameWork.MAX_PERIOD_DAYS/2;i=i+step)
-            for (int j = RecallFrameWork.MIN_PERIOD_DAYS*3; j <= RecallFrameWork.MAX_PERIOD_DAYS; j=j+step)
-                for (int k = RecallFrameWork.MIN_PERIOD_DAYS*3; k <= RecallFrameWork.MAX_PERIOD_DAYS; k=k+step)
+        for(int i=RecallFrameWork.MIN_PERIOD_DAYS; i <= RecallFrameWork.MAX_PERIOD_DAYS;i=i+step)
+            for (int j = RecallFrameWork.MIN_PERIOD_DAYS; j <= RecallFrameWork.MAX_PERIOD_DAYS; j=j+step)
+                for (int k = RecallFrameWork.MIN_PERIOD_DAYS; k <= RecallFrameWork.MAX_PERIOD_DAYS; k=k+step)
                     totalt++;
 
         int total = totalt;
-        for(int i=RecallFrameWork.MIN_PERIOD_DAYS; i <= RecallFrameWork.MAX_PERIOD_DAYS/2;i=i+step){
-            for (int j = RecallFrameWork.MIN_PERIOD_DAYS*3; j <= RecallFrameWork.MAX_PERIOD_DAYS; j=j+step){
-                for (int k = RecallFrameWork.MIN_PERIOD_DAYS*3; k <= RecallFrameWork.MAX_PERIOD_DAYS; k=k+step){
+        for(int i=RecallFrameWork.MIN_PERIOD_DAYS; i <= RecallFrameWork.MAX_PERIOD_DAYS;i=i+step){
+            for (int j = RecallFrameWork.MIN_PERIOD_DAYS; j <= RecallFrameWork.MAX_PERIOD_DAYS; j=j+step){
+                for (int k = RecallFrameWork.MIN_PERIOD_DAYS; k <= RecallFrameWork.MAX_PERIOD_DAYS; k=k+step){
                     int finalI = i;
                     int finalJ = j;
                     int finalK = k;
                     CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(()->{
                         long start = System.currentTimeMillis();
-                        BestOne bestOne = tryOnce(stockMetaDOs, today,new Wallet(),finalI,finalJ,finalK,false);
-                        bestOnes.add(bestOne);
+                        RecallResult result = tryOnce(stockMetaDOs, today,new Wallet(),finalI,finalJ,finalK,false);
+                        recallResults.add(result);
                         int fc = count.incrementAndGet();
                         long end = System.currentTimeMillis();
                         long totalSpt = totalSpendTime.addAndGet(end-start)/1000;
                         long avg = totalSpt/fc;
-                        System.out.println(Calendar.getInstance().getTime() +" : "+finalI + ":" +finalJ+":"+finalK + " done. -> "+fc+"/"+total +" \tleft Min : " + ((total-fc)*avg)/60 + " , \tspend Seconds: "+ totalSpt+" \t avg: " + avg + " | "+bestOne.getResult().getProfit() +" <e-r> "+ bestOne.getResult().getMaxRetracement()*MultiRetracementValue +" roi: "+bestOne.getResult().getRoi() * MultiRetracementValue);
+                        System.out.println(Calendar.getInstance().getTime() +" : "+finalI + ":" +finalJ+":"+finalK + " done. -> "+fc+"/"+total +" \tleft Min : " + ((total-fc)*avg)/60 + " , \tspend Seconds: "+ totalSpt+" \t avg: " + avg + " | "+ result.getProfit() +" <e-r> "+ result.getMaxRetracement()*MultiRetracementValue +" roi: "+result.getRoi() * MultiRetracementValue);
                     });
                     lotOfCpuS.add(completableFuture);
                 }
@@ -77,8 +77,8 @@ public class BollTest {
         all.join();
 
         List<Pareto> paretos = new ArrayList<>();
-        for(BestOne one : bestOnes){
-            paretos.add(new Pareto((int) Math.ceil(one.getResult().getMaxRetracement()* MultiRetracementValue),(int)one.getResult().getProfit(),one));
+        for(RecallResult result : recallResults){
+            paretos.add(new Pareto((int) Math.ceil(result.getMaxRetracement()* MultiRetracementValue),(int)result.getProfit(),result));
         }
         Map<Integer,List<Pareto>> seekParetoFrontMap = new HashMap<>();
         List<Pareto> seekParetoFronts = new ArrayList<>();
@@ -95,17 +95,20 @@ public class BollTest {
             System.out.println(eachParetos.get(0));
             System.out.println(eachParetos.get(eachParetos.size()-1));
         }
-
+        List<XYTextAnnotation> xyTextAnnotations = new ArrayList<>();
         double[][] data=new double[2][seekParetoFronts.size()];
         //出来的都是前沿,准备画图数据
         for(int i = 0;i< seekParetoFronts.size(); i++) {
-            data[0][i] = seekParetoFronts.get(i).getRetracement();
-            data[1][i] = seekParetoFronts.get(i).getEarn();
+            Pareto pareto = seekParetoFronts.get(i);
+            data[0][i] = pareto.getRetracement();
+            data[1][i] = pareto.getEarn();
+            XYTextAnnotation xyTextAnnotation = new XYTextAnnotation(pareto.getRecallResult().getOpenKeyDescribe()+pareto.getRecallResult().getCloseKeyDescribe(),pareto.getRetracement(),pareto.getEarn());
+            xyTextAnnotations.add(xyTextAnnotation);
         }
 
         DefaultXYDataset dataset = new DefaultXYDataset ();
         dataset.addSeries("worksWell",data);
-        new XYMChart(stockName,dataset);
+        new XYMChart(stockName,dataset,xyTextAnnotations);
 
         Collections.sort(seekParetoFronts);
 
@@ -120,7 +123,7 @@ public class BollTest {
         FileUtil.write2disk(stockName,w2f.toString());
     }
 
-    public static BestOne tryOnce(List<StockMetaDO> stockMetaDOs,StockMetaDO today,Wallet wallet, int openShortAvg, int openLongAvg, int closeLongAvg,boolean isPrintChart){
+    public static RecallResult tryOnce(List<StockMetaDO> stockMetaDOs,StockMetaDO today,Wallet wallet, int openShortAvg, int openLongAvg, int closeLongAvg,boolean isPrintChart){
 
         OpenBuyPosition openBuyPosition = new BollOpenBuyPositionImpl(openShortAvg, openLongAvg);
         CloseBuyPosition closeBuyPosition = new BollCloseBuyPositionImpl(closeLongAvg);
@@ -135,69 +138,6 @@ public class BollTest {
             System.out.println("Profit : " + result.getProfit());
         }
 
-        return new BestOne(openBuyPosition.toString(), closeBuyPosition.toString(), result);
-    }
-
-    static class Pareto implements Comparable<Pareto>{
-        int retracement;
-        int earn;
-        BestOne bestOne;
-
-        public Pareto(int retracement, int earn,BestOne bestOne){
-            this.retracement = retracement;
-            this.earn = earn;
-            this.bestOne = bestOne;
-        }
-
-        public int getRetracement() {
-            return retracement;
-        }
-
-        public void setRetracement(int retracement) {
-            this.retracement = retracement;
-        }
-
-        public int getEarn() {
-            return earn;
-        }
-
-        public void setEarn(int earn) {
-            this.earn = earn;
-        }
-
-        public BestOne getBestOne() {
-            return bestOne;
-        }
-
-        public void setBestOne(BestOne bestOne) {
-            this.bestOne = bestOne;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Pareto pareto = (Pareto) o;
-            return retracement == pareto.retracement && earn == pareto.earn;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(retracement, earn);
-        }
-
-        @Override
-        public String toString() {
-            return "Pareto{" +
-                    "retracement=" + retracement +
-                    ", earn=" + earn +
-                    ", bestOne=" + bestOne +
-                    '}';
-        }
-
-        @Override
-        public int compareTo(Pareto o) {
-            return bestOne.compareTo(o.bestOne);
-        }
+        return result;
     }
 }

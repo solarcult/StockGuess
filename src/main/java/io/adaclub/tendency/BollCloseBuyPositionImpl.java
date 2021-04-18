@@ -60,4 +60,9 @@ public class BollCloseBuyPositionImpl implements CloseBuyPosition {
                 "closeAvg=" + closeAvg +
                 '}';
     }
+
+    @Override
+    public String keyDescribe(){
+        return "c:"+closeAvg;
+    }
 }

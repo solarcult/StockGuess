@@ -12,6 +12,8 @@ public interface CloseBuyPosition {
 
     int getPeriod();
 
+    String keyDescribe();
+
     class ClosePosition{
         private int many;
         private boolean isSell;

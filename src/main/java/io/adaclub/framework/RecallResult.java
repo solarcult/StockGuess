@@ -13,7 +13,9 @@ public class RecallResult {
     //花出去钱和收益,花了就算,理论上应该等于profit+capitalTotalSpent
     double capitalAndProfitResult;
     double roi;
-    public RecallResult(List<XPosition> positions, List<ProfitPack> profitPacks,double capitalTotalSpent){
+    String openKeyDescribe;
+    String closeKeyDescribe;
+    public RecallResult(List<XPosition> positions, List<ProfitPack> profitPacks,double capitalTotalSpent,String openKeyDescribe,String closeKeyDescribe){
         this.positions = positions;
         this.profitPacks = profitPacks;
         this.maxRetracement = calcMaxRetracement();
@@ -21,6 +23,8 @@ public class RecallResult {
         this.capitalTotalSpent = capitalTotalSpent;
         this.capitalAndProfitResult = profitPacks.get(profitPacks.size()-1).getCapitalAndProfitResult();;
         this.roi = profit/capitalTotalSpent;
+        this.openKeyDescribe = openKeyDescribe;
+        this.closeKeyDescribe = closeKeyDescribe;
     }
 
     public List<XPosition> getPositions() {
@@ -43,6 +47,9 @@ public class RecallResult {
         double maxRetracement = 0;
         for(int i=0; i < profitPacks.size();i++){
             double todayCapitalValue = profitPacks.get(i).getCapitalAndProfitResult();
+            if(todayCapitalValue == 0){
+                continue;
+            }
             for(int j = i+1; j < profitPacks.size();j++){
                 double nextDayCapitalValue = profitPacks.get(j).getCapitalAndProfitResult();
                 double nowRetracement = (todayCapitalValue - nextDayCapitalValue) / todayCapitalValue;
@@ -94,6 +101,22 @@ public class RecallResult {
         this.roi = roi;
     }
 
+    public String getOpenKeyDescribe() {
+        return openKeyDescribe;
+    }
+
+    public void setOpenKeyDescribe(String openKeyDescribe) {
+        this.openKeyDescribe = openKeyDescribe;
+    }
+
+    public String getCloseKeyDescribe() {
+        return closeKeyDescribe;
+    }
+
+    public void setCloseKeyDescribe(String closeKeyDescribe) {
+        this.closeKeyDescribe = closeKeyDescribe;
+    }
+
     @Override
     public String toString() {
         return "RecallResult{" +
@@ -102,8 +125,8 @@ public class RecallResult {
                 ", capitalTotalSpent=" + capitalTotalSpent +
                 ", capitalAndProfitResult=" + capitalAndProfitResult +
                 ", roi=" + roi +
-//                "， positions=" + positions +
-//                ", profitPacks=" + profitPacks +
+                ", openKeyDescribe='" + openKeyDescribe + '\'' +
+                ", closeKeyDescribe='" + closeKeyDescribe + '\'' +
                 '}';
     }
 

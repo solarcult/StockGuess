@@ -3,8 +3,8 @@ package io.adaclub.framework.test;
 import io.adaclub.db.StockMetaDAOImpl;
 import io.adaclub.db.StockMetaDO;
 import io.adaclub.framework.RecallFrameWork;
+import io.adaclub.framework.RecallResult;
 import io.adaclub.framework.Wallet;
-import io.adaclub.tendency.BestOne;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +19,7 @@ public class RRR {
         //将0位置变为时间最远的数据,方便编码理解,0代表过去,size()的位置代表现在
         Collections.reverse(stockMetaDOs);
         RecallFrameWork.DEBUG = true;
-        BestOne bestOne = BollTest.tryOnce(stockMetaDOs,today,wallet,11,25,41,true);
-        System.out.println(bestOne.getResult().getMaxRetracement()*100+" , "+bestOne.getResult().getProfit()+" , "+bestOne.getResult().getRoi()*100);
+        RecallResult result = BollTest.tryOnce(stockMetaDOs,today,wallet,3,41,49,true);
+        System.out.println(result.getMaxRetracement()*100+" , "+result.getProfit()+" , "+result.getRoi()*100);
     }
 }

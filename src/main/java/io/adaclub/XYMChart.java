@@ -9,18 +9,20 @@ import org.jfree.chart.ui.ApplicationFrame;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import java.util.Collections;
+import java.util.List;
+
 public class XYMChart extends ApplicationFrame {
 
 
-    public XYMChart(String title, XYDataset xyDataset){
+    public XYMChart(String title, XYDataset xyDataset, List<XYTextAnnotation> xyTextAnnotations){
         super(title);
         final JFreeChart chart = createChart(title,xyDataset);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setMouseZoomable( true , false );
-
-        XYTextAnnotation x1 = new XYTextAnnotation("test",3,3);
-        chart.getXYPlot().addAnnotation(x1);
-
+        for(XYTextAnnotation xyTextAnnotation : xyTextAnnotations){
+            chart.getXYPlot().addAnnotation(xyTextAnnotation);
+        }
         setContentPane(chartPanel);
         pack();
         setVisible(true);
@@ -55,6 +57,6 @@ public class XYMChart extends ApplicationFrame {
 
         xydataset.addSeries("nothing", data);
 
-        new XYMChart("COOL",xydataset);
+        new XYMChart("COOL",xydataset, Collections.emptyList());
     }
 }

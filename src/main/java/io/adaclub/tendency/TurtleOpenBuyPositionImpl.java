@@ -23,4 +23,9 @@ public class TurtleOpenBuyPositionImpl implements OpenBuyPosition {
     public int getPeriod() {
         return RecallFrameWork.Period_Days_20;
     }
+
+    @Override
+    public String keyDescribe() {
+        return "b:"+getPeriod();
+    }
 }
