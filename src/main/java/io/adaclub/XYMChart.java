@@ -14,14 +14,15 @@ import java.util.List;
 
 public class XYMChart extends ApplicationFrame {
 
+    JFreeChart jFreeChart;
 
     public XYMChart(String title, XYDataset xyDataset, List<XYTextAnnotation> xyTextAnnotations){
         super(title);
-        final JFreeChart chart = createChart(title,xyDataset);
-        final ChartPanel chartPanel = new ChartPanel(chart);
+        jFreeChart = createChart(title,xyDataset);
+        final ChartPanel chartPanel = new ChartPanel(jFreeChart);
         chartPanel.setMouseZoomable( true , false );
         for(XYTextAnnotation xyTextAnnotation : xyTextAnnotations){
-            chart.getXYPlot().addAnnotation(xyTextAnnotation);
+            jFreeChart.getXYPlot().addAnnotation(xyTextAnnotation);
         }
         setContentPane(chartPanel);
         pack();
@@ -39,6 +40,10 @@ public class XYMChart extends ApplicationFrame {
                 false,
                 false,
                 false);
+    }
+
+    public JFreeChart getjFreeChart() {
+        return jFreeChart;
     }
 
     public static void main(String[] args){

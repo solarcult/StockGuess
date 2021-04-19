@@ -63,6 +63,6 @@ public class BollCloseBuyPositionImpl implements CloseBuyPosition {
 
     @Override
     public String keyDescribe(){
-        return "c:"+closeAvg;
+        return "c."+closeAvg;
     }
 }

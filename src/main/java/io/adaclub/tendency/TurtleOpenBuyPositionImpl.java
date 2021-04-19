@@ -26,6 +26,6 @@ public class TurtleOpenBuyPositionImpl implements OpenBuyPosition {
 
     @Override
     public String keyDescribe() {
-        return "b:"+getPeriod();
+        return "b."+getPeriod();
     }
 }

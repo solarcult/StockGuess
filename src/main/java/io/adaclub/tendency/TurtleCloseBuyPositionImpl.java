@@ -25,6 +25,6 @@ public class TurtleCloseBuyPositionImpl implements CloseBuyPosition {
 
     @Override
     public String keyDescribe() {
-        return "c:"+getPeriod();
+        return "c."+getPeriod();
     }
 }

@@ -11,11 +11,16 @@ public class FileUtil {
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
     public static String DELETE_SYMBOL=".sy";
 
+    public static String getTimeString(){
+        return sdf.format(Calendar.getInstance().getTime());
+
+    }
+
     public static void write2disk(String filename,String whatiwant2records) {
         List<String> bestPutStockCodes = new ArrayList<>();
         try {
-            String time = sdf.format(Calendar.getInstance().getTime());
-            BufferedWriter out=new BufferedWriter(new FileWriter(filename+"_"+time+".sy",false));
+            String time = getTimeString();
+            BufferedWriter out = new BufferedWriter(new FileWriter(filename+"_"+time+".sy",false));
             out.write("\n");
             out.newLine();
             out.write(whatiwant2records);

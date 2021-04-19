@@ -85,6 +85,6 @@ public class BollOpenBuyPositionImpl implements OpenBuyPosition {
 
     @Override
     public String keyDescribe(){
-        return "o:" + shortAvg +"," + longAvg+";";
+        return "o." + shortAvg +"," + longAvg+";";
     }
 }

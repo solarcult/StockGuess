@@ -1,15 +1,21 @@
 package io.adaclub.framework;
 
+import io.adaclub.FileUtil;
 import io.adaclub.TimeSeriesChart;
 import io.adaclub.db.StockMetaDAOImpl;
 import io.adaclub.db.StockMetaDO;
 import io.adaclub.tendency.TurtleCloseBuyPositionImpl;
 import io.adaclub.tendency.TurtleOpenBuyPositionImpl;
+import org.jfree.chart.ChartUtils;
+import org.jfree.chart.servlet.ServletUtilities;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.time.TimeSeriesDataItem;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,8 +142,16 @@ public class RecallFrameWork {
         }
 
         if(isPrintChart) {
-            new TimeSeriesChart(stockName + " " + chartType + " Profits", new TimeSeriesCollection(seriesProfits));
-            new TimeSeriesChart(stockName + " " + chartType + " CapitalAndProfit-ALL",new TimeSeriesCollection(seriesCapitals));
+            String profitsName = stockName + "_" + chartType + "_Profits_"+openBuyPositionImpl.keyDescribe() + closeBuyPositionImpl.keyDescribe();
+            TimeSeriesChart  profits = new TimeSeriesChart(profitsName, new TimeSeriesCollection(seriesProfits));
+            String capitalName = stockName + "_" + chartType + " CapitalAndProfit-ALL "+openBuyPositionImpl.keyDescribe() + closeBuyPositionImpl.keyDescribe() ;
+            TimeSeriesChart capital = new TimeSeriesChart(capitalName,new TimeSeriesCollection(seriesCapitals));
+            try {
+                ChartUtils.saveChartAsJPEG(new File(profitsName + "_" + FileUtil.getTimeString() +".jpg"), profits.getjFreeChart(), 1920, 1080);
+                ChartUtils.saveChartAsJPEG(new File(capitalName + "_" + FileUtil.getTimeString() + ".jpg"), capital.getjFreeChart(), 1920, 1080);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
 
         return new RecallResult(positions,profitPacks,wallet.getUsedMoneyTotalCapital(),openBuyPositionImpl.keyDescribe(), closeBuyPositionImpl.keyDescribe());
