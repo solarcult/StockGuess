@@ -23,7 +23,7 @@ public class BollTest {
 
     public static void main(String[] args){
         RecallFrameWork.chartType = "Boll";
-        String stockCode = "MSFT";
+        String stockCode = "SPY";
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
         //将0位置变为时间最远的数据,方便编码理解,0代表过去,size()的位置代表现在
@@ -44,7 +44,7 @@ public class BollTest {
         w2f.append(new Wallet()).append("\n");
         List<RecallResult> recallResults = new ArrayList<>();
         List<CompletableFuture<Void>> lotOfCpuS = new ArrayList<>();
-        int step = 15;
+        int step = 4;
         String stockName = stockMetaDOs.get(0).getStock();
         AtomicInteger count = new AtomicInteger();
         AtomicLong totalSpendTime = new AtomicLong();
@@ -63,7 +63,7 @@ public class BollTest {
                     int finalK = k;
                     CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(()->{
                         long start = System.currentTimeMillis();
-                        RecallResult result = tryOnce(stockMetaDOs, today,new Wallet(),finalI,finalJ,finalK,false);
+                        RecallResult result = tryOnce(stockMetaDOs,new Wallet(),finalI,finalJ,finalK,false);
                         recallResults.add(result);
                         int fc = count.incrementAndGet();
                         long end = System.currentTimeMillis();
@@ -88,6 +88,9 @@ public class BollTest {
         List<Pareto> seekParetoFronts = new ArrayList<>();
         //进行帕累托前沿分析,并画图
         for(Pareto pareto : paretos){
+            if(pareto.getRetracement() > 100){
+                continue;
+            }
             List<Pareto> retracements = seekParetoFrontMap.getOrDefault(pareto.getRetracement(),new ArrayList<>());
             retracements.add(pareto);
             seekParetoFrontMap.put(pareto.getRetracement(),retracements);
@@ -133,7 +136,7 @@ public class BollTest {
         FileUtil.write2disk(stockName,w2f.toString());
     }
 
-    public static RecallResult tryOnce(List<StockMetaDO> stockMetaDOs,StockMetaDO today,Wallet wallet, int openShortAvg, int openLongAvg, int closeLongAvg,boolean isPrintChart){
+    public static RecallResult tryOnce(List<StockMetaDO> stockMetaDOs,Wallet wallet, int openShortAvg, int openLongAvg, int closeLongAvg,boolean isPrintChart){
 
         OpenBuyPosition openBuyPosition = new BollOpenBuyPositionImpl(openShortAvg, openLongAvg);
         CloseBuyPosition closeBuyPosition = new BollCloseBuyPositionImpl(closeLongAvg);

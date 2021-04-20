@@ -41,6 +41,11 @@ public class BollOpenBuyPositionImpl implements OpenBuyPosition {
             System.out.println("BollOpenBuyPositionImpl shortAvg is null "+today.getId() +" "+today.getStock() +" "+shortAvg);
         }
 
+        StockAnalyzeDO yesterdaySAO5 = StockAnalyzeDAOImpl.findByStockStuff(today.getId()-1,today.getStock(),StockMetaDO.CycleType.DAY.name(), shortAvg);
+        if(yesterdaySAO5==null){
+            System.out.println("BollOpenBuyPositionImpl shortAvg is null "+(today.getId()-1) +" "+today.getStock() +" "+shortAvg);
+        }
+
         //计算20日均线状态
         TendencyUtil.WaveStatus waveStatus20 = TendencyUtil.waveAverageClose(stockAnalyzeDOs20,todaySAO20);
         //20日均线有?0%以上都在高位运行
@@ -54,6 +59,8 @@ public class BollOpenBuyPositionImpl implements OpenBuyPosition {
 //                    today.getClose() <= (todaySAO5.getLowMean() -  1.5 * todaySAO5.getLowSd())
 
                     today.getClose() <= (todaySAO5.getLowMean() -  todaySAO5.getLowSd())
+
+                        && todaySAO5.getCloseMean() > yesterdaySAO5.getCloseMean()
 
                 ) {
                 if(RecallFrameWork.DEBUG) {
