@@ -7,15 +7,12 @@ import io.adaclub.db.StockMetaDO;
 import io.adaclub.tendency.TurtleCloseBuyPositionImpl;
 import io.adaclub.tendency.TurtleOpenBuyPositionImpl;
 import org.jfree.chart.ChartUtils;
-import org.jfree.chart.servlet.ServletUtilities;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.time.TimeSeriesDataItem;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 

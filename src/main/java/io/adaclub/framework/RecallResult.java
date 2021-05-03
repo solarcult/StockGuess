@@ -21,7 +21,7 @@ public class RecallResult {
         this.maxRetracement = calcMaxRetracement();
         this.profit = profitPacks.get(profitPacks.size()-1).getProfit();
         this.capitalTotalSpent = capitalTotalSpent;
-        this.capitalAndProfitResult = profitPacks.get(profitPacks.size()-1).getCapitalAndProfitResult();;
+        this.capitalAndProfitResult = profitPacks.get(profitPacks.size()-1).getCapitalAndProfitResult();
         this.roi = profit/capitalTotalSpent;
         this.openKeyDescribe = openKeyDescribe;
         this.closeKeyDescribe = closeKeyDescribe;
