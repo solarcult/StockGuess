@@ -1,7 +1,6 @@
-package io.adaclub.framework.test;
+package io.adaclub.tendency.test;
 
 import io.adaclub.FileUtil;
-import io.adaclub.TimeSeriesChart;
 import io.adaclub.XYMChart;
 import io.adaclub.db.StockMetaDAOImpl;
 import io.adaclub.db.StockMetaDO;
@@ -10,7 +9,6 @@ import io.adaclub.tendency.BollCloseBuyPositionImpl;
 import io.adaclub.tendency.BollOpenBuyPositionImpl;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import java.io.File;

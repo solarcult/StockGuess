@@ -1,4 +1,4 @@
-package io.adaclub.framework.test;
+package io.adaclub.tendency.test;
 
 import io.adaclub.db.StockMetaDAOImpl;
 import io.adaclub.db.StockMetaDO;
