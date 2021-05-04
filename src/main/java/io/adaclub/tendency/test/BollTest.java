@@ -19,9 +19,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class BollTest {
 
+    static int STEP = 6;
+
     public static void main(String[] args){
         RecallFrameWork.chartType = "Boll";
-        String stockCode = "SPY";
+        String stockCode = "MSFT";
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);
         //将0位置变为时间最远的数据,方便编码理解,0代表过去,size()的位置代表现在
@@ -42,20 +44,19 @@ public class BollTest {
         w2f.append(new Wallet()).append("\n");
         List<RecallResult> recallResults = new ArrayList<>();
         List<CompletableFuture<Void>> lotOfCpuS = new ArrayList<>();
-        int step = 4;
         String stockName = stockMetaDOs.get(0).getStock();
         AtomicInteger count = new AtomicInteger();
         AtomicLong totalSpendTime = new AtomicLong();
         int totalt = 0;
-        for(int i=RecallFrameWork.MIN_PERIOD_DAYS; i <= RecallFrameWork.MAX_PERIOD_DAYS;i=i+step)
-            for (int j = RecallFrameWork.MIN_PERIOD_DAYS; j <= RecallFrameWork.MAX_PERIOD_DAYS; j=j+step)
-                for (int k = RecallFrameWork.MIN_PERIOD_DAYS; k <= RecallFrameWork.MAX_PERIOD_DAYS; k=k+step)
+        for(int i=RecallFrameWork.MIN_PERIOD_DAYS; i <= RecallFrameWork.MAX_PERIOD_DAYS;i=i+STEP)
+            for (int j = RecallFrameWork.MIN_PERIOD_DAYS; j <= RecallFrameWork.MAX_PERIOD_DAYS; j=j+STEP)
+                for (int k = RecallFrameWork.MIN_PERIOD_DAYS; k <= RecallFrameWork.MAX_PERIOD_DAYS; k=k+STEP)
                     totalt++;
 
         int total = totalt;
-        for(int i=RecallFrameWork.MIN_PERIOD_DAYS; i <= RecallFrameWork.MAX_PERIOD_DAYS;i=i+step){
-            for (int j = RecallFrameWork.MIN_PERIOD_DAYS; j <= RecallFrameWork.MAX_PERIOD_DAYS; j=j+step){
-                for (int k = RecallFrameWork.MIN_PERIOD_DAYS; k <= RecallFrameWork.MAX_PERIOD_DAYS; k=k+step){
+        for(int i=RecallFrameWork.MIN_PERIOD_DAYS; i <= RecallFrameWork.MAX_PERIOD_DAYS;i=i+STEP){
+            for (int j = RecallFrameWork.MIN_PERIOD_DAYS; j <= RecallFrameWork.MAX_PERIOD_DAYS; j=j+STEP){
+                for (int k = RecallFrameWork.MIN_PERIOD_DAYS; k <= RecallFrameWork.MAX_PERIOD_DAYS; k=k+STEP){
                     int finalI = i;
                     int finalJ = j;
                     int finalK = k;
@@ -80,7 +81,7 @@ public class BollTest {
 
         List<Pareto> paretos = new ArrayList<>();
         for(RecallResult result : recallResults){
-            paretos.add(new Pareto((int) Math.ceil(result.getMaxRetracement()* MultiRetracementValue),(int)result.getProfit(),result));
+            paretos.add(new Pareto((int) Math.ceil(result.getMaxRetracement() * MultiRetracementValue),(int)result.getProfit(),result));
         }
         Map<Integer,List<Pareto>> seekParetoFrontMap = new HashMap<>();
         List<Pareto> seekParetoFronts = new ArrayList<>();
@@ -147,6 +148,7 @@ public class BollTest {
             }
             System.out.println("\nTotalSize : " + positions.size());
             System.out.println("Profit : " + result.getProfit());
+            System.out.println(result);
         }
 
         return result;

@@ -155,7 +155,7 @@ public class RecallFrameWork {
     }
 
     public static void main(String[] args){
-        String stockCode = "VT";
+        String stockCode = "SPY";
         Wallet wallet = new Wallet();
         List<StockMetaDO> stockMetaDOs = StockMetaDAOImpl.list(stockCode,StockMetaDO.CycleType.DAY.name(), 1000);
         StockMetaDO today = stockMetaDOs.get(0);

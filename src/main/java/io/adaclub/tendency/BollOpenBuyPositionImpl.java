@@ -60,7 +60,7 @@ public class BollOpenBuyPositionImpl implements OpenBuyPosition {
 
                     today.getClose() <= (todaySAO5.getLowMean() -  todaySAO5.getLowSd())
 
-                        && todaySAO5.getCloseMean() > yesterdaySAO5.getCloseMean()
+//                        && todaySAO5.getCloseMean() > yesterdaySAO5.getCloseMean()
 
                 ) {
                 if(RecallFrameWork.DEBUG) {
