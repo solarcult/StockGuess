@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class BollTest {
 
-    static int STEP = 6;
+    static int STEP = 4;
 
     public static void main(String[] args){
         RecallFrameWork.chartType = "Boll";
